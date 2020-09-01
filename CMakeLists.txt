@@ -5,63 +5,67 @@ project(mangadex-dl
         DESCRIPTION "Mangadex downloader, built with C++"
         HOMEPAGE_URL https://github.com/HackingPheasant/mangadex-dl
         LANGUAGES CXX)
+include(cmake/StandardProjectSettings.cmake)
+include(cmake/PreventInSourceBuilds.cmake)
 
-# CMake Modules
-include(FetchContent)
+# Link this 'library' to set the c++ standard / compile-time options requested
+add_library(project_options INTERFACE)
+target_compile_features(project_options INTERFACE cxx_std_17)
 
-# Build settings
-# Wrapped if's to allow user override
-if(NOT DEFINED CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release)
+if(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
+  option(ENABLE_BUILD_WITH_TIME_TRACE "Enable -ftime-trace to generate time tracing .json files on clang" OFF)
+  if(ENABLE_BUILD_WITH_TIME_TRACE)
+    add_compile_definitions(project_options INTERFACE -ftime-trace)
+  endif()
 endif()
 
-if (NOT DEFINED CMAKE_CXX_STANDARD_REQUIRED)
-  set(CMAKE_CXX_STANDARD_REQUIRED ON)
+# Link this 'library' to use the warnings specified in CompilerWarnings.cmake
+add_library(project_warnings INTERFACE)
+
+# enable cache system
+include(cmake/Cache.cmake)
+
+# standard compiler warnings
+include(cmake/CompilerWarnings.cmake)
+set_project_warnings(project_warnings)
+
+# sanitizer options if supported by compiler
+include(cmake/Sanitizers.cmake)
+enable_sanitizers(project_options)
+
+# allow for static analysis options
+include(cmake/StaticAnalyzers.cmake)
+
+# Shared libs (.dll/.so) or Static libs (.lib/.a)
+option(BUILD_SHARED_LIBS "Enable compilation of shared libraries" OFF)
+# We should at least ENABLE_TESTING when we have some tests
+option(ENABLE_TESTING "Enable Test Builds" OFF) 
+option(ENABLE_FUZZING "Enable Fuzzing Builds" OFF)
+
+if(ENABLE_TESTING)
+  enable_testing()
+  message("Building Tests.")
+  add_subdirectory(test)
 endif()
 
-if (NOT DEFINED CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 17)
+if(ENABLE_FUZZING)
+  message("Building Fuzz Tests, using fuzzing sanitizer https://www.llvm.org/docs/LibFuzzer.html")
+  add_subdirectory(fuzz_test)
 endif()
 
+# Put the libaries and binaries that get built into directories at the
+# top of the build tree rather than in hard-to-find leaf directories.
+#
+# But only if this variables are not defined yet
+# (i.e. libevent is used via add_subdirectory())
 if (NOT DEFINED CMAKE_RUNTIME_OUTPUT_DIRECTORY)
-  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
+endif()
+if (NOT DEFINED CMAKE_LIBRARY_OUTPUT_DIRECTORY)
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
+endif()
+if (NOT DEFINED CMAKE_ARCHIVE_OUTPUT_DIRECTORY)
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 endif()
 
-# CPR Configuration
-if (NOT DEFINED BUILD_CPR_TESTS)
-    set(BUILD_CPR_TESTS OFF)
-endif()
-
-if (NOT DEFINED BUILD_CPR_TESTS_SSL)
-    set(BUILD_CPR_TESTS_SSL OFF)
-endif()
-
-# Grab dependencies
-FetchContent_Declare(
-    cpr
-    GIT_REPOSITORY https://github.com/whoshuu/cpr.git
-    GIT_TAG v1.5.1
-    )
-FetchContent_Declare(
-    json
-    GIT_REPOSITORY https://github.com/nlohmann/json.git
-    GIT_TAG v3.9.0
-    )
-
-FetchContent_MakeAvailable(cpr)
-FetchContent_MakeAvailable(json)
-
-# Static Checks
-# Clang Tidy
-# TODO: 
-# - Put a check to make optional
-# - Check if available on system before using
-set(CMAKE_CXX_CLANG_TIDY clang-tidy -checks=-*,readability-*)
-
-# Compile program
-add_executable(${PROJECT_NAME} src/main.cpp)
-
-# Link the dependencies with our binary
-target_link_libraries(${PROJECT_NAME}
-                      PRIVATE cpr::cpr
-                      PRIVATE nlohmann_json::nlohmann_json)
+add_subdirectory(src)

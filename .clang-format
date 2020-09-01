@@ -1,0 +1,16 @@
+---
+BasedOnStyle: LLVM
+AlignAfterOpenBracket: DontAlign
+AlignConsecutiveMacros: 'true'
+AlignEscapedNewlines: Left
+AlignOperands: 'true'
+BreakBeforeBraces: Attach
+ColumnLimit: '0'
+FixNamespaceComments: 'true'
+IndentWidth: '4'
+KeepEmptyLinesAtTheStartOfBlocks: 'false'
+Language: Cpp
+Standard: Cpp11
+TabWidth: '4'
+
+...

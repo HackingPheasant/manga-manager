@@ -3,7 +3,8 @@
 # https://github.com/lefticus/cppbestpractices/blob/master/02-Use_the_Tools_Available.md
 
 function(set_project_warnings project_name)
-  option(WARNINGS_AS_ERRORS "Treat compiler warnings as errors" TRUE)
+  option(WARNINGS_AS_ERRORS "Treat compiler warnings as errors" FALSE)
+  # TODO: Set true as default once dependency errors are dealt with
 
   set(MSVC_WARNINGS
       /W4 # Baseline reasonable warnings

@@ -89,7 +89,7 @@ By default (if you don't set environment variables `CC` and `CXX`), the system d
 If you use `cmake --build` instead of directly calling the underlying build system you can use:
 - `-v` for verbose builds (CMake 3.14+)
 - `--parallel N` or `-j N` for parallel builds on N cores (CMake 3.12+)
-- `--target` (Any CMake version) or `-t` (CMake 3.15+) to pick a target
+- `--target` (Any CMake version) or `-t` (CMake 3.15+) to pick a target. E.g. `--target clean`
 
 Some common CMake options that may be useful:
 - `-DCMAKE_BUILD_TYPE=` with the following options which may include `None`, `Debug`, `Release`, `RelWithDebInfo` or something else not listed

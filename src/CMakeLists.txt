@@ -26,7 +26,12 @@ FetchContent_MakeAvailable(cpr)
 FetchContent_MakeAvailable(json)
 
 # Compile program
-add_executable(${PROJECT_NAME} main.cpp)
+add_executable(${PROJECT_NAME} mangadex.cpp main.cpp)
+
+# Set the directories that should be included in the build command for this target
+# when running g++ these will be included as -I/directory/path/
+target_include_directories(${PROJECT_NAME} 
+                           PRIVATE ${PROJECT_SOURCE_DIR}/include)
 
 # Link the dependencies with our binary
 target_link_libraries(${PROJECT_NAME}

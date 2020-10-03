@@ -18,72 +18,81 @@ Mangadex downloader built with C++
 
 **Notes:**
 By default (if you don't set environment variables `CC` and `CXX`), the system default compiler will be used.
+This code currently makes use of C++20 Ranges, and at the time of writing (2020-10-03) only GCC 10.1 and upwards has Ranges support.
+
 <details>
 <summary>Commands for setting the compilers </summary>
-- \*NIX Based:
+Substitute your desired compiler (`clang`, `gcc`, etc) as necessary when following.
 
-        Set your desired compiler (`clang`, `gcc`, etc):
+- ***NIX Based:**
+    - **Temporarily** *(only for the current shell)***:**
+    
+        Run one of the following in the terminal:
+        - clang
+        ```bash
+        CC=clang
+        CXX=clang++
+        ```
+        - gcc
+        ```bash
+        CC=gcc
+        CXX=g++
+        ```
+    - **Permanent:**
+    
+        Set in your shell config/startup file, the following example shows how to setup clang as the default for the bash shell
 
-        - Temporarily (only for the current shell)
+        Open `~/.bashrc` using your text editor:
+        ```bash
+        gedit ~/.bashrc
+        ```
+        Add `CC` and `CXX` to point to the compilers:
+        ```basH
+        export CC=clang
+        export CXX=clang++
+        ```
+        Save and close the file.
 
-                Run one of the followings in the terminal:
+- **Windows:**
+    - **Permanent:**
+    
+        Run one of the following in PowerShell:
+        - Visual Studio generator and compiler (cl)
+        ```powershell
+        [Environment]::SetEnvironmentVariable("CC", "cl.exe", "User")
+        [Environment]::SetEnvironmentVariable("CXX", "cl.exe", "User")
+        refreshenv
+        ```
+        Set the architecture using [vsvarsall](https://docs.microsoft.com/en-us/cpp/build/building-on-the-command-line?view=vs-2019#vcvarsall-syntax):
+        ```powershell
+        vsvarsall.bat x64
+        ```
+        - clang
+        ```powershell
+        [Environment]::SetEnvironmentVariable("CC", "clang.exe", "User")
+        [Environment]::SetEnvironmentVariable("CXX", "clang++.exe", "User")
+        refreshenv
+        ```
+        - gcc
+        ```powershell
+        [Environment]::SetEnvironmentVariable("CC", "gcc.exe", "User")
+        [Environment]::SetEnvironmentVariable("CXX", "g++.exe", "User")
+        refreshenv
+        ```
+    - **Temporarily** *(only for the current shell)***:**
+    
+        Run one of the following in PowerShell:
+        - clang
+        ```powershell
+        $Env:CC="clang.exe"
+        $Env:CXX="clang++.exe"
+        ```
+        - gcc
+        ```powershell
+        $Env:CC="gcc.exe"
+        $Env:CXX="g++.exe"
+        ```
 
-                - clang
-                ```bash
-                CC=clang CXX=clang++
-                ```
-                - gcc
-                ```bash
-                CC=gcc CXX=g++
-                ```
-        - Permanent:
-                Set in your shell config/startup file, the following example shows how to do it for bash
-
-                Open `~/.bashrc` using your text editor:
-                ```bash
-                gedit ~/.bashrc
-                ```
-                Add `CC` and `CXX` to point to the compilers:
-                ```bash
-                export CC=clang
-                export CXX=clang++
-                ```
-                Save and close the file.
-
-- Windows:
-
-        - Permanent:
-
-                Run one of the followings in PowerShell:
-
-                    - Visual Studio generator and compiler (cl)
-                    ```powershell
-                    [Environment]::SetEnvironmentVariable("CC", "cl.exe", "User")
-                    [Environment]::SetEnvironmentVariable("CXX", "cl.exe", "User")
-                    refreshenv
-                    ```
-                    Set the architecture using [vsvarsall](https://docs.microsoft.com/en-us/cpp/build/building-on-the-command-line?view=vs-2019#vcvarsall-syntax):
-                    ```powershell
-                    vsvarsall.bat x64
-                    ```
-                    - clang
-                    ```powershell
-                    [Environment]::SetEnvironmentVariable("CC", "clang.exe", "User")
-                    [Environment]::SetEnvironmentVariable("CXX", "clang++.exe", "User")
-                    refreshenv
-                    ```
-                    - gcc
-                    ```powershell
-                    [Environment]::SetEnvironmentVariable("CC", "gcc.exe", "User")
-                    [Environment]::SetEnvironmentVariable("CXX", "g++.exe", "User")
-                    refreshenv
-                    ```
-
-        - Temporarily (only for the current shell):
-            ```powershell
-            $Env:CC="clang.exe"
-            $Env:CXX="clang++.exe"
-            ```
 </details>
 
 If you use `cmake --build` instead of directly calling the underlying build system you can use:

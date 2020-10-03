@@ -42,6 +42,7 @@ int main(int argc, char **argv) {
     }
 
     Manga manga(manga_id);
+    manga.prettyPrint();
 
     return 0;
 }

@@ -126,15 +126,14 @@ private:
     std::string cover_url;
     std::string orig_lang_name;
     std::string orig_lang_flag;
-    // std::vector<int> genres;
+    std::vector<int> genres;
     // std::vector<int> chapters;
-    // std::vector<std::string> artists;
-    // std::vector<std::string> authors;
-    // std::map<std::string, std::string> links;
-    bool writeFile(std::string, std::string);
+    std::vector<std::string> artists;
+    std::vector<std::string> authors;
+    std::map<std::string, std::string> links;
 public:
     Manga(std::string); // Constructor
-    bool downloadCover(std::string);
+    void prettyPrint();
 };
 
 #endif // SRC_MANGADEX_H

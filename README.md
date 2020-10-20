@@ -1,5 +1,5 @@
-# mangadex-dl
-Mangadex downloader built with C++
+# manga-manager
+Manga manger and downloader built with C++
 
 ## Build
 1. Setup (Create build directory, run build generation system and grab dependencies)

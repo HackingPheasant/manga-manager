@@ -31,8 +31,8 @@ private:
         std::string manga_name;
     };
     struct PartialChapter {
+        unsigned long id;
         unsigned long timestamp; // Year 2038 problem avoided (for now)
-        std::string id;
         std::string volume;
         std::string chapter;
         std::string title;
@@ -40,11 +40,11 @@ private:
         std::string lang_code;
         std::map<int, std::string> groups;
     };
-    short is_hentai; // Should see about converting to bool
+    bool is_hentai; // Should see about converting to bool
     short pub_status;
     short demographic;
+    unsigned long id;
     unsigned long last_updated;
-    std::string id;
     std::string title;
     std::string description;
     std::string cover_url;

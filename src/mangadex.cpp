@@ -52,16 +52,21 @@ void split_string_into_vector (std::string str, char delimiter, std::vector<std:
                         static_cast<std::string_view::size_type>(ranges::distance(sub)));
                 }))
     {
-        auto split_str_trimmed{ ltrim(split_str) };
+        auto split_str_trimmed{ trim(split_str) };
         vec.push_back(std::string{split_str_trimmed});
     }
 }
 
+bool boolean_convert (short b) {
+    return b ? true : false;
+}
+
 void Manga::prettyPrint() {
     // Pretty print a few things for testing
+    std::cout << "ID: " << id << std::endl;
     std::cout << "Title: " << title << std::endl;
     std::cout << "Description: " << description << std::endl;
-    std::cout << "Is Hentai?: "<< is_hentai<< std::endl;
+    std::cout << "Is Hentai?: " << std::boolalpha << is_hentai<< std::endl;
     std::cout << "Publishing Status: " << pub_status_strings.find(pub_status)->second << std::endl;
     std::cout << "Original Language: " << orig_lang_name << " (" << orig_lang_flag << ")" << std::endl;
     std::cout << "Main Cover: " << BASE_URL + cover_url << std::endl;
@@ -116,24 +121,25 @@ void Manga::prettyPrint() {
 Manga::Manga(std::string manga_id) {
     using json = nlohmann::json;
     
-    id = manga_id; //id
-    std::string manga_api_url = MANGA_API + id;
-
+    // Contruct API url and get JSON response
+    std::string manga_api_url = MANGA_API + manga_id;
     cpr::Response r = cpr::Get(cpr::Url{manga_api_url});
 
     // Create an empty structure (null)
     auto j = json::parse(r.text);
 
-    // Reserve space in vector capacity to be at least enoug to contain n elements
+    // Reserve space in vector capacity to be at least enough to contain "n" amount of elements
     genres.reserve(8);
     artists.reserve(2);
     authors.reserve(2);
     related_mangas.reserve(5);
     partial_chapters.reserve(100);
- 
+
+    // Initalize the data in the class
+    id = std::stoul(manga_id); //id
     cover_url = j["manga"]["cover_url"]; //cover_url
     description = j["manga"]["description"]; //description
-    is_hentai = j["manga"]["hentai"]; //is_hentai
+    is_hentai = boolean_convert(j["manga"]["hentai"]); //is_hentai
     pub_status = j["manga"]["status"]; //pub_status
     demographic = j["manga"]["demographic"]; //demographic
     title = j["manga"]["title"]; // title 
@@ -148,6 +154,7 @@ Manga::Manga(std::string manga_id) {
     split_string_into_vector(authors_string, ',', authors); //authors
     covers = j["manga"]["covers"].get<std::vector<std::string>>(); //covers
     links = j["manga"]["links"].get<std::map<std::string, std::string>>(); //links
+
     // related_mangas
     for (auto &rel : j["manga"]["related"].items())  {
         RelatedManga related;
@@ -160,12 +167,13 @@ Manga::Manga(std::string manga_id) {
         //Push related mangas into a vector
         related_mangas.push_back(related);
     }
+
     //partial_chapters
     for (auto &chap : j["chapter"].items()) {
         PartialChapter chapter;
 
         chapter.timestamp = chap.value()["timestamp"].get<unsigned long>();
-        chapter.id = chap.key();
+        chapter.id = std::stoul(chap.key());
         chapter.volume = chap.value()["volume"].get<std::string>();
         chapter.chapter = chap.value()["chapter"].get<std::string>();
         chapter.title = chap.value()["title"].get<std::string>();

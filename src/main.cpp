@@ -45,7 +45,7 @@ int main(int argc, char **argv) {
 
     manga.prettyPrint();
     std::string lang_code = "gb";
-    manga.grabChapters(lang_code);
+    manga.getChapters(lang_code);
 
     return 0;
 }

@@ -1,6 +1,7 @@
 #ifndef SRC_MANGADEX_H
 #define SRC_MANGADEX_H
 
+#include <list>
 #include <map>
 #include <string>
 #include <vector>
@@ -47,7 +48,7 @@ private:
         std::string manga_hash;
         std::string server_url;
         std::string server_url_fallback;
-        std::vector<std::string> page_array;
+        std::list<std::string> page_array;
     };
     bool is_hentai; // Should see about converting to bool
     short pub_status;
@@ -59,13 +60,13 @@ private:
     std::string cover_url;
     std::string orig_lang_name;
     std::string orig_lang_flag;
+    std::list<std::string> covers;
+    std::list<PartialChapter> partial_chapters;
+    std::list<Chapter> chapters;
     std::vector<short> genres;
     std::vector<std::string> alt_names;
     std::vector<std::string> artists;
     std::vector<std::string> authors;
-    std::vector<std::string> covers;
-    std::vector<PartialChapter> partial_chapters;
-    std::vector<Chapter> chapters;
     std::vector<RelatedManga> related_mangas;
     std::map<std::string, std::string> links;
     // Translate int->string
@@ -103,7 +104,7 @@ private:
 public:
     Manga(std::string); // Constructor
     void prettyPrint();
-    void grabChapters(std::string);
+    void getChapters(std::string);
 };
 
 #endif // SRC_MANGADEX_H

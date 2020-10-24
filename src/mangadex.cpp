@@ -1,5 +1,6 @@
 #include <fstream>
 #include <iostream>
+#include <list>
 #include <string>
 #include <string_view>
 #include <ranges>
@@ -116,6 +117,7 @@ void Manga::prettyPrint() {
             std::cout << "\t\t\t" << key << " -> " << value << std::endl;
         }
     }
+    std::cout << "Size of list: " << partial_chapters.size() << std::endl;
 }
 
 Manga::Manga(std::string manga_id) {
@@ -133,7 +135,6 @@ Manga::Manga(std::string manga_id) {
     artists.reserve(2);
     authors.reserve(2);
     related_mangas.reserve(5);
-    partial_chapters.reserve(100);
 
     // Initalize the data in the class
     id = std::stoul(manga_id); //id
@@ -152,7 +153,7 @@ Manga::Manga(std::string manga_id) {
     std::string authors_string = j["manga"]["author"];
     split_string_into_vector(artists_string, ',', artists); //artists
     split_string_into_vector(authors_string, ',', authors); //authors
-    covers = j["manga"]["covers"].get<std::vector<std::string>>(); //covers
+    covers = j["manga"]["covers"].get<std::list<std::string>>(); //covers
     links = j["manga"]["links"].get<std::map<std::string, std::string>>(); //links
 
     // related_mangas
@@ -187,7 +188,7 @@ Manga::Manga(std::string manga_id) {
             chapter.groups.insert ( std::pair<int, std::string>(chap.value()["group_id_3"].get<int>(), chap.value()["group_name_3"].get<std::string>()) );
         }
  
-        // Push chapter object into a vector
+        // Push chapter object into a list
         partial_chapters.push_back(chapter);
     }
 
@@ -198,17 +199,15 @@ Manga::Manga(std::string manga_id) {
 
 }
 
-void Manga::grabChapters(std::string lang_code) {
+void Manga::getChapters(std::string lang_code) {
     using json = nlohmann::json;
-
-    chapters.reserve(100);
 
     // Is this the most efficent way? Have no clue
     // Why not just extend/add onto the object you already created? dunno how to do it properly
     // So instead I just use the data from the partial chapter objects so I can
     // get the data from the chapter API only for the chapters I want, then add all that
     // data into a new object and deleting the old object (dunno how to add or extend the current objects)
-    for(auto i : partial_chapters){
+    for(auto i : partial_chapters) {
         if (i.lang_code == lang_code) {
             // Contruct API url and get JSON response
             std::string chapter_api_url = CHAPTER_API + i.id;
@@ -240,12 +239,18 @@ void Manga::grabChapters(std::string lang_code) {
             chapter.manga_hash = j["hash"].get<std::string>();
             chapter.server_url = j["server"].get<std::string>();
             chapter.server_url_fallback = j["server_fallback"].get<std::string>();
-            chapter.page_array = j["page_array"].get<std::vector<std::string>>();
+            chapter.page_array = j["page_array"].get<std::list<std::string>>();
 
-            // Push chapter object into a vector
+            // Push chapter object into a list
+            // Remove old objects from partial_chapter list
+            // TODO Figure out how to remove the old partial chapter from the list 
+            // since we already have it in the chapter list now
+            // TODO Do We NEED this? 
             chapters.push_back(chapter);
-            // Remove old objects from partial_chapter vector
-            // TODO
+
+            // remove old objects from partial_chapter list
+            // todo figure out how to remove the old partial chapter from the list 
+            // since we already have it in the chapter list now
         }
     }
 }

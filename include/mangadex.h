@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 
+
 // Based off https://github.com/md-y/mangadex-full-api
 const std::string BASE_URL = "https://mangadex.org";
 const std::string MANGA_API = BASE_URL + "/api/manga/";
@@ -104,7 +105,8 @@ private:
 public:
     Manga(std::string); // Constructor
     void prettyPrint();
-    void getChapters(std::string);
+    void getDataChapters(std::string);
+    bool downloadChapters(std::string);
 };
 
 #endif // SRC_MANGADEX_H

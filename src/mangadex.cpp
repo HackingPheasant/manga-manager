@@ -199,7 +199,7 @@ Manga::Manga(std::string manga_id) {
 
 }
 
-void Manga::getChapters(std::string lang_code) {
+void Manga::getDataChapters(std::string lang_code) {
     using json = nlohmann::json;
 
     // Is this the most efficent way? Have no clue
@@ -253,4 +253,19 @@ void Manga::getChapters(std::string lang_code) {
             // since we already have it in the chapter list now
         }
     }
+}
+
+bool Manga::downloadChapters(std::string output_directory) {
+    std::cout << "Output Directory: " << output_directory << std::endl;
+
+    for (auto i : chapters) {
+        for (auto j : i.page_array) {
+            std::string page_url = i.server_url + i.manga_hash + "/" + j;
+            cpr::Response r = cpr::Get(cpr::Url{page_url});
+            std::string out = output_directory+ "/" + j;
+            writeFile(r.text, out);
+        };
+    };
+
+    return 0;
 }

@@ -7,6 +7,8 @@
 static void show_usage(std::string name) {
     std::cerr << "Usage: " << name << " [options] <id>\n\n"
               << "Options:\n"
+              << "\t-d,--download\t\tDownload Chapters\n"
+              << "\t-o,--output-directory\tSpecify output directory.\n\t\t\t\tIf not specified then current directory is used\n"
               << "\t-h,--help\t\tShow this help message\n"
               << "\t-V,--version\t\tDisplay version information"
               << std::endl;
@@ -20,6 +22,8 @@ int main(int argc, char **argv) {
     }
     std::vector<std::string> allArgs;
     std::string manga_id;
+    bool download = false; // Default to false and explicitly enable download
+    std::string output_directory;
     // argv+1 to skip over executables location
     for (int i = 1; i < argc; ++i) {
         std::string arg = argv[i];
@@ -34,6 +38,16 @@ int main(int argc, char **argv) {
             return 0;
         }
 
+        if ((arg == "-d") || (arg == "--download")) {
+            download = true;
+        }
+
+        if ((arg == "-o") || (arg == "--output-directory")) {
+            output_directory = argv[i+1]; // I AM STUPID AND THIS IS BROKEN
+        } else {
+            output_directory = ".";
+        }
+
         if (i + 1 < argc) {
             allArgs.push_back(argv[i]); // Add all but the last argument to the vector.
         } else {
@@ -45,7 +59,9 @@ int main(int argc, char **argv) {
 
     manga.prettyPrint();
     std::string lang_code = "gb";
-    manga.getChapters(lang_code);
-
+    manga.getDataChapters(lang_code);
+    if (download) {
+        manga.downloadChapters(output_directory);
+    }
     return 0;
 }

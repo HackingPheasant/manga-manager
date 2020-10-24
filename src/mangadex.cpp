@@ -173,7 +173,7 @@ Manga::Manga(std::string manga_id) {
         PartialChapter chapter;
 
         chapter.timestamp = chap.value()["timestamp"].get<unsigned long>();
-        chapter.id = std::stoul(chap.key());
+        chapter.id = chap.key();
         chapter.volume = chap.value()["volume"].get<std::string>();
         chapter.chapter = chap.value()["chapter"].get<std::string>();
         chapter.title = chap.value()["title"].get<std::string>();
@@ -196,4 +196,56 @@ Manga::Manga(std::string manga_id) {
     //r = cpr::Get(cpr::Url{cover_url});
     //writeFile(r.text, "Cover.jpeg");
 
+}
+
+void Manga::grabChapters(std::string lang_code) {
+    using json = nlohmann::json;
+
+    chapters.reserve(100);
+
+    // Is this the most efficent way? Have no clue
+    // Why not just extend/add onto the object you already created? dunno how to do it properly
+    // So instead I just use the data from the partial chapter objects so I can
+    // get the data from the chapter API only for the chapters I want, then add all that
+    // data into a new object and deleting the old object (dunno how to add or extend the current objects)
+    for(auto i : partial_chapters){
+        if (i.lang_code == lang_code) {
+            // Contruct API url and get JSON response
+            std::string chapter_api_url = CHAPTER_API + i.id;
+            std::cout << chapter_api_url << std::endl;
+            cpr::Response r = cpr::Get(cpr::Url{chapter_api_url});
+
+            // Create an empty structure (null)
+            auto j = json::parse(r.text);
+
+            //partial_chapters
+            Chapter chapter;
+
+            chapter.id = j["id"].get<unsigned long>();
+            chapter.timestamp = j["timestamp"].get<unsigned long>();
+            chapter.long_strip = j["long_strip"].get<bool>();
+            chapter.chapter_status = j["status"].get<std::string>();
+            chapter.volume = j["volume"].get<std::string>();
+            chapter.chapter = j["chapter"].get<std::string>();
+            chapter.title = j["title"].get<std::string>();
+            chapter.lang_name = j["lang_name"].get<std::string>();
+            chapter.lang_code = j["lang_code"].get<std::string>();
+            chapter.groups.insert ( std::pair<int, std::string>(j["group_id"].get<int>(), j["group_name"].get<std::string>()) );
+            if (j["group_id_2"].get<int>() != 0) {
+                chapter.groups.insert ( std::pair<int, std::string>(j["group_id_2"].get<int>(), j["group_name_2"].get<std::string>()) );
+            }
+            if (j["group_id_3"].get<int>() != 0) {
+                chapter.groups.insert ( std::pair<int, std::string>(j["group_id_3"].get<int>(), j["group_name_3"].get<std::string>()) );
+            }
+            chapter.manga_hash = j["hash"].get<std::string>();
+            chapter.server_url = j["server"].get<std::string>();
+            chapter.server_url_fallback = j["server_fallback"].get<std::string>();
+            chapter.page_array = j["page_array"].get<std::vector<std::string>>();
+
+            // Push chapter object into a vector
+            chapters.push_back(chapter);
+            // Remove old objects from partial_chapter vector
+            // TODO
+        }
+    }
 }

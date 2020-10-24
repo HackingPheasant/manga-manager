@@ -8,7 +8,7 @@
 // Based off https://github.com/md-y/mangadex-full-api
 const std::string BASE_URL = "https://mangadex.org";
 const std::string MANGA_API = BASE_URL + "/api/manga/";
-const std::string CHPATER_API = BASE_URL + "/api/manga/";
+const std::string CHAPTER_API = BASE_URL + "/api/chapter/";
 
 
 /* Notes for reference
@@ -31,14 +31,23 @@ private:
         std::string manga_name;
     };
     struct PartialChapter {
-        unsigned long id;
         unsigned long timestamp; // Year 2038 problem avoided (for now)
+        std::string id;
         std::string volume;
         std::string chapter;
         std::string title;
         std::string lang_name;
         std::string lang_code;
         std::map<int, std::string> groups;
+    };
+    struct Chapter: PartialChapter {
+        unsigned long id;
+        bool long_strip;
+        std::string chapter_status;
+        std::string manga_hash;
+        std::string server_url;
+        std::string server_url_fallback;
+        std::vector<std::string> page_array;
     };
     bool is_hentai; // Should see about converting to bool
     short pub_status;
@@ -56,6 +65,7 @@ private:
     std::vector<std::string> authors;
     std::vector<std::string> covers;
     std::vector<PartialChapter> partial_chapters;
+    std::vector<Chapter> chapters;
     std::vector<RelatedManga> related_mangas;
     std::map<std::string, std::string> links;
     // Translate int->string
@@ -93,6 +103,7 @@ private:
 public:
     Manga(std::string); // Constructor
     void prettyPrint();
+    void grabChapters(std::string);
 };
 
 #endif // SRC_MANGADEX_H

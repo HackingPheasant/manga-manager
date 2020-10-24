@@ -42,7 +42,10 @@ int main(int argc, char **argv) {
     }
 
     Manga manga(manga_id);
+
     manga.prettyPrint();
+    std::string lang_code = "gb";
+    manga.grabChapters(lang_code);
 
     return 0;
 }

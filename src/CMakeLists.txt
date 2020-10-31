@@ -14,12 +14,12 @@ endif()
 FetchContent_Declare(
     cpr
     GIT_REPOSITORY https://github.com/whoshuu/cpr.git
-    GIT_TAG v1.5.1
+    GIT_TAG 1.5.2
     )
 FetchContent_Declare(
     json
     GIT_REPOSITORY https://github.com/nlohmann/json.git
-    GIT_TAG v3.9.0
+    GIT_TAG v3.9.1
     )
 
 FetchContent_MakeAvailable(cpr)

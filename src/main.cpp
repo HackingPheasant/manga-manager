@@ -46,7 +46,7 @@ int main(int argc, char **argv) {
         }
 
         if ((arg == "-o") || (arg == "--output-directory")) {
-            output_directory = argv[i+1]; // I AM STUPID AND THIS IS BROKEN
+            output_directory = argv[i + 1]; // I AM STUPID AND THIS IS BROKEN
         } else {
             output_directory = ".";
         }

@@ -38,7 +38,7 @@ int main(int argc, char **argv) {
         }
 
         if ((arg == "-V") || (arg == "--version")) {
-            std::cout << argv[0] << " 0.1.0" << std::endl;
+            fmt::print("{} 0.1.0\n", argv[0]);
             return 0;
         }
 

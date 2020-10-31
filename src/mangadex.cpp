@@ -4,6 +4,7 @@
 #include <string_view>
 
 #include <cpr/cpr.h>
+#include <fmt/core.h>
 
 #include "mangadex.h"
 
@@ -57,60 +58,60 @@ bool boolean_convert(short b) {
 
 void Manga::prettyPrint() {
     // Pretty print a few things for testing
-    std::cout << "ID: " << id << std::endl;
-    std::cout << "Title: " << title << std::endl;
-    std::cout << "Description: " << description << std::endl;
-    std::cout << "Is Hentai?: " << std::boolalpha << is_hentai << std::endl;
-    std::cout << "Publishing Status: " << pub_status_strings.find(pub_status)->second << std::endl;
-    std::cout << "Original Language: " << orig_lang_name << " (" << orig_lang_flag << ")" << std::endl;
-    std::cout << "Main Cover: " << BASE_URL + cover_url << std::endl;
-    std::cout << "Links: " << std::endl;
+    fmt::print("ID: {}\n", id);
+    fmt::print("Title: {}\n", title);
+    fmt::print("Description: {}\n", description);
+    fmt::print("Is Hentai?: {}\n", is_hentai);
+    fmt::print("Publishing Status: {}\n", pub_status_strings.find(pub_status)->second);
+    fmt::print("Original Language: {} ({})\n", orig_lang_name, orig_lang_flag);
+    fmt::print("Main Cover: {}\n", BASE_URL + cover_url);
+    fmt::print("Links:\n");
     for (auto &[key, value] : links) {
-        std::cout << "\t" << key << " -> " << value << std::endl;
+        fmt::print("\t{} -> {}\n", key, value);
     }
     if (demographic != 0) {
-        std::cout << "Demograpic: " << demographic_strings.find(demographic)->second << std::endl;
+        fmt::print("Demograpic: {}\n", demographic_strings.find(demographic)->second);
     }
-    std::cout << "Genres: " << std::endl;
+    fmt::print("Genres:\n");
     for (auto i : genres) {
-        std::cout << "\t" << genre_strings.find(i)->second << std::endl;
+        fmt::print("\t{}\n", genre_strings.find(i)->second);
     }
-    std::cout << "Alternative name(s): " << std::endl;
+    fmt::print("Alternative name(s):\n");
     for (auto i : alt_names) {
-        std::cout << "\t" << i << std::endl;
+        fmt::print("\t{}\n", i);
     }
-    std::cout << "Artists: " << std::endl;
+    fmt::print("Artists:\n");
     for (auto i : artists) {
-        std::cout << "\t" << i << std::endl;
+        fmt::print("\t{}\n", i);
     }
-    std::cout << "Authors: " << std::endl;
+    fmt::print("Authors:\n");
     for (auto i : authors) {
-        std::cout << "\t" << i << std::endl;
+        fmt::print("\t{}\n", i);
     }
-    std::cout << "Covers: " << std::endl;
+    fmt::print("Covers:\n");
     for (auto i : covers) {
-        std::cout << "\t" << BASE_URL + i << std::endl;
+        fmt::print("\t{}\n", BASE_URL + i);
     }
-    std::cout << "Related Manga: " << std::endl;
+    fmt::print("Related Manga:\n");
     for (auto i : related_mangas) {
-        std::cout << "\tID: " << i.related_manga_id << std::endl;
-        std::cout << "\t\tTitle: " << i.manga_name << " (" << related_id_strings.find(i.relation_id)->second << ")" << std::endl;
-        std::cout << "\t\tIs Hentai?: " << i.is_related_manga_hentai << std::endl;
+        fmt::print("\tID: {}\n", i.related_manga_id);
+        fmt::print("\t\tTitle: {} ({})\n", i.manga_name, related_id_strings.find(i.relation_id)->second);
+        fmt::print("\t\tIs Hentai?: {}\n", i.is_related_manga_hentai);
     }
-    std::cout << "Chapters (Partial Info): " << std::endl;
+    fmt::print("Chapters:\n");
     for (auto i : partial_chapters) {
-        std::cout << "\tChapter ID: " << i.id << std::endl;
-        std::cout << "\t\tTimestamp: " << i.timestamp << std::endl;
-        std::cout << "\t\tVolume: " << i.volume << std::endl;
-        std::cout << "\t\tChapter: " << i.chapter << std::endl;
-        std::cout << "\t\tTitle: " << i.title << std::endl;
-        std::cout << "\t\tTranslated Language: " << i.lang_name << " (" << i.lang_code << ")" << std::endl;
-        std::cout << "\t\tGroup(s): " << std::endl;
+        fmt::print("\tChapter ID: {}\n", i.id);
+        fmt::print("\t\tTimestamp: {}\n", i.timestamp);
+        fmt::print("\t\tVolume: {}\n", i.volume);
+        fmt::print("\t\tChapter: {}\n", i.chapter);
+        fmt::print("\t\tTitle: {}\n", i.title);
+        fmt::print("\t\tTranslated Language: {} ({})\n", i.lang_name, i.lang_code);
+        fmt::print("\t\tGroup(s):\n");
         for (auto &[key, value] : i.groups) {
-            std::cout << "\t\t\t" << key << " -> " << value << std::endl;
+            fmt::print("\t\t\t{} -> {}\n", key, value);
         }
     }
-    std::cout << "Size of list: " << partial_chapters.size() << std::endl;
+    fmt::print("Size of list: {}\n", partial_chapters.size());
 }
 
 Manga::Manga(std::string manga_id, const nlohmann::json &json) {
@@ -147,7 +148,7 @@ Manga::Manga(std::string manga_id, const nlohmann::json &json) {
         related.relation_id = rel.value()["relation_id"].get<short>();
         related.related_manga_id = rel.value()["related_manga_id"].get<int>();
         related.manga_name = rel.value()["manga_name"].get<std::string>();
-        related.is_related_manga_hentai = rel.value()["manga_hentai"].get<short>();
+        related.is_related_manga_hentai = boolean_convert(rel.value()["manga_hentai"]);
 
         //Push related mangas into a vector
         related_mangas.push_back(related);

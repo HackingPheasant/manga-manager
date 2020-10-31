@@ -27,7 +27,7 @@ ChapterType != "OK" then {
 class Manga {
   private:
     struct RelatedManga {
-        short is_related_manga_hentai;
+        bool is_related_manga_hentai;
         short relation_id;
         int related_manga_id;
         std::string manga_name;

@@ -21,10 +21,15 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/nlohmann/json.git
     GIT_TAG v3.9.1
     )
+FetchContent_Declare(
+    fmt
+    GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+    GIT_TAG 7.1.0
+    )
 
 FetchContent_MakeAvailable(cpr)
 FetchContent_MakeAvailable(json)
-
+FetchContent_MakeAvailable(fmt)
 # Compile program
 add_executable(${PROJECT_NAME} mangadex.cpp main.cpp)
 
@@ -38,4 +43,5 @@ target_link_libraries(${PROJECT_NAME}
                       PRIVATE project_options
                       PRIVATE project_warnings
                       PRIVATE cpr::cpr
-                      PRIVATE nlohmann_json::nlohmann_json)
+                      PRIVATE nlohmann_json::nlohmann_json
+                      PRIVATE fmt::fmt)

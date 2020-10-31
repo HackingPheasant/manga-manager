@@ -3,6 +3,7 @@
 #include <vector>
 
 #include <cpr/cpr.h>
+#include <fmt/core.h> // Will change to std::format when compilers support it
 #include <nlohmann/json.hpp>
 
 #include "mangadex.h"
@@ -64,6 +65,15 @@ int main(int argc, char **argv) {
 
     // Create an empty structure (null)
     auto json = nlohmann::json::parse(response.text);
+
+    // Handle Errors
+    if (response.error) {
+        throw std::runtime_error(fmt::format("Unable to download info for manga \"{}\"\n Error : {}", manga_id, response.error.message));
+    }
+
+    if (response.status_code != 200) {
+        throw std::runtime_error(fmt::format("Unable to download info for manga \"{}\"\n Status code : {}", manga_id, response.status_code));
+    }
 
     Manga manga(manga_id, json);
 

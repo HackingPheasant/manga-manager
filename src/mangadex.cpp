@@ -1,13 +1,9 @@
 #include <fstream>
 #include <iostream>
-#include <list>
-#include <string>
 #include <string_view>
 #include <ranges>
-#include <vector>
 
 #include <cpr/cpr.h>
-#include <nlohmann/json.hpp>
 
 #include "mangadex.h"
 
@@ -120,16 +116,7 @@ void Manga::prettyPrint() {
     std::cout << "Size of list: " << partial_chapters.size() << std::endl;
 }
 
-Manga::Manga(std::string manga_id) {
-    using json = nlohmann::json;
-    
-    // Contruct API url and get JSON response
-    std::string manga_api_url = MANGA_API + manga_id;
-    cpr::Response r = cpr::Get(cpr::Url{manga_api_url});
-
-    // Create an empty structure (null)
-    auto j = json::parse(r.text);
-
+Manga::Manga(std::string manga_id, const nlohmann::json &json) {
     // Reserve space in vector capacity to be at least enough to contain "n" amount of elements
     genres.reserve(8);
     artists.reserve(2);
@@ -138,26 +125,26 @@ Manga::Manga(std::string manga_id) {
 
     // Initalize the data in the class
     id = std::stoul(manga_id); //id
-    cover_url = j["manga"]["cover_url"]; //cover_url
-    description = j["manga"]["description"]; //description
-    is_hentai = boolean_convert(j["manga"]["hentai"]); //is_hentai
-    pub_status = j["manga"]["status"]; //pub_status
-    demographic = j["manga"]["demographic"]; //demographic
-    title = j["manga"]["title"]; // title 
-    orig_lang_name = j["manga"]["lang_name"]; //orig_lang_name
-    orig_lang_flag = j["manga"]["lang_flag"]; //orig_lang_flag
-    genres = j["manga"]["genres"].get<std::vector<short>>(); //genres
-    alt_names = j["manga"]["alt_names"].get<std::vector<std::string>>(); //alt_names
+    cover_url = json["manga"]["cover_url"].get<std::string>(); //cover_url
+    description = json["manga"]["description"].get<std::string>(); //description
+    is_hentai = boolean_convert(json["manga"]["hentai"]); //is_hentai
+    pub_status = json["manga"]["status"].get<short>(); //pub_status
+    demographic = json["manga"]["demographic"].get<short>(); //demographic
+    title = json["manga"]["title"].get<std::string>(); // title 
+    orig_lang_name = json["manga"]["lang_name"].get<std::string>(); //orig_lang_name
+    orig_lang_flag = json["manga"]["lang_flag"].get<std::string>(); //orig_lang_flag
+    genres = json["manga"]["genres"].get<std::vector<short>>(); //genres
+    alt_names = json["manga"]["alt_names"].get<std::vector<std::string>>(); //alt_names
     // TODO: Handle null values in below areas
-    std::string artists_string = j["manga"]["artist"];
-    std::string authors_string = j["manga"]["author"];
+    std::string artists_string = json["manga"]["artist"].get<std::string>();
+    std::string authors_string = json["manga"]["author"].get<std::string>();
     split_string_into_vector(artists_string, ',', artists); //artists
     split_string_into_vector(authors_string, ',', authors); //authors
-    covers = j["manga"]["covers"].get<std::list<std::string>>(); //covers
-    links = j["manga"]["links"].get<std::map<std::string, std::string>>(); //links
+    covers = json["manga"]["covers"].get<std::list<std::string>>(); //covers
+    links = json["manga"]["links"].get<std::map<std::string, std::string>>(); //links
 
     // related_mangas
-    for (auto &rel : j["manga"]["related"].items())  {
+    for (auto &rel : json["manga"]["related"].items())  {
         RelatedManga related;
 
         related.relation_id = rel.value()["relation_id"].get<short>();
@@ -170,7 +157,7 @@ Manga::Manga(std::string manga_id) {
     }
 
     //partial_chapters
-    for (auto &chap : j["chapter"].items()) {
+    for (auto &chap : json["chapter"].items()) {
         PartialChapter chapter;
 
         chapter.timestamp = chap.value()["timestamp"].get<unsigned long>();
@@ -191,17 +178,9 @@ Manga::Manga(std::string manga_id) {
         // Push chapter object into a list
         partial_chapters.push_back(chapter);
     }
-
-    // Download Cover
-    // TODO: Move elsewhere so class initialization is quicker
-    //r = cpr::Get(cpr::Url{cover_url});
-    //writeFile(r.text, "Cover.jpeg");
-
 }
 
 void Manga::getDataChapters(std::string lang_code) {
-    using json = nlohmann::json;
-
     // Is this the most efficent way? Have no clue
     // Why not just extend/add onto the object you already created? dunno how to do it properly
     // So instead I just use the data from the partial chapter objects so I can
@@ -212,34 +191,34 @@ void Manga::getDataChapters(std::string lang_code) {
             // Contruct API url and get JSON response
             std::string chapter_api_url = CHAPTER_API + i.id;
             std::cout << chapter_api_url << std::endl;
-            cpr::Response r = cpr::Get(cpr::Url{chapter_api_url});
+            cpr::Response response = cpr::Get(cpr::Url{chapter_api_url});
 
             // Create an empty structure (null)
-            auto j = json::parse(r.text);
+            auto json = nlohmann::json::parse(response.text);
 
             //partial_chapters
             Chapter chapter;
 
-            chapter.id = j["id"].get<unsigned long>();
-            chapter.timestamp = j["timestamp"].get<unsigned long>();
-            chapter.long_strip = j["long_strip"].get<bool>();
-            chapter.chapter_status = j["status"].get<std::string>();
-            chapter.volume = j["volume"].get<std::string>();
-            chapter.chapter = j["chapter"].get<std::string>();
-            chapter.title = j["title"].get<std::string>();
-            chapter.lang_name = j["lang_name"].get<std::string>();
-            chapter.lang_code = j["lang_code"].get<std::string>();
-            chapter.groups.insert ( std::pair<int, std::string>(j["group_id"].get<int>(), j["group_name"].get<std::string>()) );
-            if (j["group_id_2"].get<int>() != 0) {
-                chapter.groups.insert ( std::pair<int, std::string>(j["group_id_2"].get<int>(), j["group_name_2"].get<std::string>()) );
+            chapter.id = json["id"].get<unsigned long>();
+            chapter.timestamp = json["timestamp"].get<unsigned long>();
+            chapter.long_strip = json["long_strip"].get<bool>();
+            chapter.chapter_status = json["status"].get<std::string>();
+            chapter.volume = json["volume"].get<std::string>();
+            chapter.chapter = json["chapter"].get<std::string>();
+            chapter.title = json["title"].get<std::string>();
+            chapter.lang_name = json["lang_name"].get<std::string>();
+            chapter.lang_code = json["lang_code"].get<std::string>();
+            chapter.groups.insert ( std::pair<int, std::string>(json["group_id"].get<int>(), json["group_name"].get<std::string>()) );
+            if (json["group_id_2"].get<int>() != 0) {
+                chapter.groups.insert ( std::pair<int, std::string>(json["group_id_2"].get<int>(), json["group_name_2"].get<std::string>()) );
             }
-            if (j["group_id_3"].get<int>() != 0) {
-                chapter.groups.insert ( std::pair<int, std::string>(j["group_id_3"].get<int>(), j["group_name_3"].get<std::string>()) );
+            if (json["group_id_3"].get<int>() != 0) {
+                chapter.groups.insert ( std::pair<int, std::string>(json["group_id_3"].get<int>(), json["group_name_3"].get<std::string>()) );
             }
-            chapter.manga_hash = j["hash"].get<std::string>();
-            chapter.server_url = j["server"].get<std::string>();
-            chapter.server_url_fallback = j["server_fallback"].get<std::string>();
-            chapter.page_array = j["page_array"].get<std::list<std::string>>();
+            chapter.manga_hash = json["hash"].get<std::string>();
+            chapter.server_url = json["server"].get<std::string>();
+            chapter.server_url_fallback = json["server_fallback"].get<std::string>();
+            chapter.page_array = json["page_array"].get<std::list<std::string>>();
 
             // Push chapter object into a list
             // Remove old objects from partial_chapter list

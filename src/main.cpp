@@ -2,6 +2,9 @@
 #include <string>
 #include <vector>
 
+#include <cpr/cpr.h>
+#include <nlohmann/json.hpp>
+
 #include "mangadex.h"
 
 static void show_usage(std::string name) {
@@ -55,7 +58,14 @@ int main(int argc, char **argv) {
         }
     }
 
-    Manga manga(manga_id);
+    // Contruct API url and get JSON response
+    std::string manga_api_url = MANGA_API + manga_id;
+    cpr::Response response = cpr::Get(cpr::Url{manga_api_url});
+
+    // Create an empty structure (null)
+    auto json = nlohmann::json::parse(response.text);
+
+    Manga manga(manga_id, json);
 
     manga.prettyPrint();
     std::string lang_code = "gb";

@@ -116,6 +116,7 @@ Listed in no particular order
 - [nlohmann/json](https://github.com/nlohmann/json/) C++ JSON library
 - [whoshuu/cpr](https://github.com/whoshuu/cpr) C++ Requests wrapper around libcurl to simplify usage in code
 - [CMake](https://cmake.org/)
+- [bibo5088/mangadex-downloader](https://github.com/bibo5088/mangadex-downloader/) Mangadex downloader partially based off this project
 
 ## License
 This program is available to anybody free of charge, under the terms of MIT License (see [LICENSE](LICENSE)).

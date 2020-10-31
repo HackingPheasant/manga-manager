@@ -6,13 +6,14 @@
 #include <string>
 #include <vector>
 
+#include <nlohmann/json.hpp>
 
-// Based off https://github.com/md-y/mangadex-full-api
+
 const std::string BASE_URL = "https://mangadex.org";
 const std::string MANGA_API = BASE_URL + "/api/manga/";
 const std::string CHAPTER_API = BASE_URL + "/api/chapter/";
 
-
+// Based off https://github.com/md-y/mangadex-full-api
 /* Notes for reference
 ChapterType != "OK" then {
     // Hosted and readable on MangaDex
@@ -43,8 +44,8 @@ private:
         std::map<int, std::string> groups;
     };
     struct Chapter: PartialChapter {
-        unsigned long id;
         bool long_strip;
+        unsigned long id;
         std::string chapter_status;
         std::string manga_hash;
         std::string server_url;
@@ -103,7 +104,7 @@ private:
         { 15, "Serialization" }
     };
 public:
-    Manga(std::string); // Constructor
+    Manga(std::string, const nlohmann::json &); // Constructor
     void prettyPrint();
     void getDataChapters(std::string);
     bool downloadChapters(std::string);

@@ -42,15 +42,6 @@ class Manga {
         std::string lang_code;
         std::map<int, std::string> groups;
     };
-    struct Chapter : PartialChapter {
-        bool long_strip;
-        unsigned long id;
-        std::string chapter_status;
-        std::string manga_hash;
-        std::string server_url;
-        std::string server_url_fallback;
-        std::list<std::string> page_array;
-    };
     bool is_hentai; // Should see about converting to bool
     short pub_status;
     short demographic;
@@ -63,7 +54,6 @@ class Manga {
     std::string orig_lang_flag;
     std::list<std::string> covers;
     std::list<PartialChapter> partial_chapters;
-    std::list<Chapter> chapters;
     std::vector<short> genres;
     std::vector<std::string> alt_names;
     std::vector<std::string> artists;
@@ -100,10 +90,20 @@ class Manga {
         {15, "Serialization"}};
 
   public:
+    struct Chapter : PartialChapter {
+        bool long_strip;
+        unsigned long id;
+        std::string chapter_status;
+        std::string manga_hash;
+        std::string server_url;
+        std::string server_url_fallback;
+        std::list<std::string> page_array;
+        // TODO Handle the external data option e.g. https://mangadex.org/api/chapter/670701
+    };
     Manga(std::string, const nlohmann::json &); // Constructor
     void prettyPrint();
-    void getDataChapters(std::string);
-    bool downloadChapters(std::string);
+    void fetchChapter(Chapter &, const nlohmann::json &);
+    bool downloadChapter(const Chapter &, std::string);
 };
 
 #endif // SRC_MANGADEX_H

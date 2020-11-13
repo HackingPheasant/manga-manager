@@ -27,6 +27,7 @@ int main(int argc, char **argv) {
     std::vector<std::string> allArgs;
     std::string manga_id;
     bool download = false; // Default to false and explicitly enable download
+    bool continue_downloading = true;
     std::string output_directory;
     // argv+1 to skip over executables location
     for (int i = 1; i < argc; ++i) {
@@ -59,11 +60,9 @@ int main(int argc, char **argv) {
         }
     }
 
-    // Contruct API url and get JSON response
+    // Contruct API url for manga and get JSON response
     std::string manga_api_url = MANGA_API + manga_id;
     cpr::Response response = cpr::Get(cpr::Url{manga_api_url});
-
-    // Create an empty structure (null)
     auto json = nlohmann::json::parse(response.text);
 
     // Handle Errors
@@ -78,10 +77,43 @@ int main(int argc, char **argv) {
     Manga manga(manga_id, json);
 
     manga.prettyPrint();
-    std::string lang_code = "gb";
-    manga.getDataChapters(lang_code);
-    if (download) {
-        manga.downloadChapters(output_directory);
+
+    // Download chapters if passed download flag
+    while (download && continue_downloading) {
+        std::string chapter_id;
+        fmt::print("Enter chapter ID to download specific chapter: ");
+        std::cin >> chapter_id;
+
+        // Contruct API url for chapter and get JSON response
+        std::string chapter_api_url = CHAPTER_API + chapter_id;
+        response = cpr::Get(cpr::Url{chapter_api_url});
+        json = nlohmann::json::parse(response.text);
+
+        // Handle Errors
+        // TODO: Maybe make this into a function to remove duplication?
+        if (response.error) {
+            throw std::runtime_error(fmt::format("Unable to download info for chapter \"{}\"\n Error : {}", chapter_id, response.error.message));
+        }
+
+        if (response.status_code != 200) {
+            throw std::runtime_error(fmt::format("Unable to download info for chapter \"{}\"\n Status code : {}", chapter_id, response.status_code));
+        }
+
+        // Nested Objected (Chapter) created, then the data will be filled in with the fetchChapter function
+        Manga::Chapter chapter;
+        manga.fetchChapter(chapter, json);
+        manga.downloadChapter(chapter, output_directory);
+
+        // Ask user if they want to download more chapters
+        std::string input;
+        fmt::print("Download more chapters? (y/n)\n");
+        std::cin >> input;
+
+        if (input == "y") {
+            continue_downloading = true;
+        } else {
+            continue_downloading = false;
+        }
     }
     return 0;
 }

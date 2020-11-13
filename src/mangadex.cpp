@@ -178,71 +178,38 @@ Manga::Manga(std::string manga_id, const nlohmann::json &json) {
     }
 }
 
-void Manga::getDataChapters(std::string lang_code) {
-    // Is this the most efficent way? Have no clue
-    // Why not just extend/add onto the object you already created? dunno how to do it properly
-    // So instead I just use the data from the partial chapter objects so I can
-    // get the data from the chapter API only for the chapters I want, then add all that
-    // data into a new object and deleting the old object (dunno how to add or extend the current objects)
-    for (auto i : partial_chapters) {
-        if (i.lang_code == lang_code) {
-            // Contruct API url and get JSON response
-            std::string chapter_api_url = CHAPTER_API + i.id;
-            std::cout << chapter_api_url << std::endl;
-            cpr::Response response = cpr::Get(cpr::Url{chapter_api_url});
-
-            // Create an empty structure (null)
-            auto json = nlohmann::json::parse(response.text);
-
-            //partial_chapters
-            Chapter chapter;
-
-            chapter.id = json["id"].get<unsigned long>();
-            chapter.timestamp = json["timestamp"].get<unsigned long>();
-            chapter.long_strip = json["long_strip"].get<bool>();
-            chapter.chapter_status = json["status"].get<std::string>();
-            chapter.volume = json["volume"].get<std::string>();
-            chapter.chapter = json["chapter"].get<std::string>();
-            chapter.title = json["title"].get<std::string>();
-            chapter.lang_name = json["lang_name"].get<std::string>();
-            chapter.lang_code = json["lang_code"].get<std::string>();
-            chapter.groups.insert(std::pair<int, std::string>(json["group_id"].get<int>(), json["group_name"].get<std::string>()));
-            if (json["group_id_2"].get<int>() != 0) {
-                chapter.groups.insert(std::pair<int, std::string>(json["group_id_2"].get<int>(), json["group_name_2"].get<std::string>()));
-            }
-            if (json["group_id_3"].get<int>() != 0) {
-                chapter.groups.insert(std::pair<int, std::string>(json["group_id_3"].get<int>(), json["group_name_3"].get<std::string>()));
-            }
-            chapter.manga_hash = json["hash"].get<std::string>();
-            chapter.server_url = json["server"].get<std::string>();
-            chapter.server_url_fallback = json["server_fallback"].get<std::string>();
-            chapter.page_array = json["page_array"].get<std::list<std::string>>();
-
-            // Push chapter object into a list
-            // Remove old objects from partial_chapter list
-            // TODO Figure out how to remove the old partial chapter from the list
-            // since we already have it in the chapter list now
-            // TODO Do We NEED this?
-            chapters.push_back(chapter);
-
-            // remove old objects from partial_chapter list
-            // todo figure out how to remove the old partial chapter from the list
-            // since we already have it in the chapter list now
-        }
+void Manga::fetchChapter(Chapter &chapter, const nlohmann::json &json) {
+    chapter.id = json["id"].get<unsigned long>();
+    chapter.timestamp = json["timestamp"].get<unsigned long>();
+    chapter.long_strip = json["long_strip"].get<bool>();
+    chapter.chapter_status = json["status"].get<std::string>();
+    chapter.volume = json["volume"].get<std::string>();
+    chapter.chapter = json["chapter"].get<std::string>();
+    chapter.title = json["title"].get<std::string>();
+    chapter.lang_name = json["lang_name"].get<std::string>();
+    chapter.lang_code = json["lang_code"].get<std::string>();
+    chapter.groups.insert(std::pair<int, std::string>(json["group_id"].get<int>(), json["group_name"].get<std::string>()));
+    if (json["group_id_2"].get<int>() != 0) {
+        chapter.groups.insert(std::pair<int, std::string>(json["group_id_2"].get<int>(), json["group_name_2"].get<std::string>()));
     }
+    if (json["group_id_3"].get<int>() != 0) {
+        chapter.groups.insert(std::pair<int, std::string>(json["group_id_3"].get<int>(), json["group_name_3"].get<std::string>()));
+    }
+    chapter.manga_hash = json["hash"].get<std::string>();
+    chapter.server_url = json["server"].get<std::string>();
+    // TODO Handle if fallback server isn't present in json response
+    chapter.server_url_fallback = json["server_fallback"].get<std::string>();
+    chapter.page_array = json["page_array"].get<std::list<std::string>>();
 }
 
-bool Manga::downloadChapters(std::string output_directory) {
-    std::cout << "Output Directory: " << output_directory << std::endl;
+bool Manga::downloadChapter(const Chapter &chapter, std::string output_directory) {
+    fmt::print("Downloading.\nOutput Directory: {}\n", output_directory);
 
-    for (auto i : chapters) {
-        for (auto j : i.page_array) {
-            std::string page_url = i.server_url + i.manga_hash + "/" + j;
-            cpr::Response r = cpr::Get(cpr::Url{page_url});
-            std::string out = output_directory + "/" + j;
-            writeFile(r.text, out);
-        };
+    for (auto i : chapter.page_array) {
+        std::string page_url = chapter.server_url + chapter.manga_hash + "/" + i;
+        cpr::Response r = cpr::Get(cpr::Url{page_url});
+        std::string out = output_directory + "/" + i;
+        writeFile(r.text, out);
     };
-
     return 0;
 }

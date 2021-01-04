@@ -8,7 +8,7 @@
 
 #include "mangadex.h"
 
-static void show_usage(std::string name) {
+static void show_usage(const std::string &name) {
     std::cerr << "Usage: " << name << " [options] <id>\n\n"
               << "Options:\n"
               << "\t-d,--download\t\tDownload Chapters\n"
@@ -18,7 +18,7 @@ static void show_usage(std::string name) {
               << std::endl;
 }
 
-int main(int argc, char **argv) {
+auto main(int argc, const char **argv) -> int {
     // TODO: Fix this very crude commandline parsing
     if (argc < 2) {
         show_usage(argv[0]);

@@ -1,59 +1,74 @@
 #include <fstream>
 #include <iostream>
-#include <ranges>
 #include <string_view>
+
+// Fallback for limited <ranges> support
+#ifdef __has_include
+#if __has_include(<ranges>)
+#include <ranges>
+#else
+#include <sstream>
+#endif
+#endif
 
 #include <cpr/cpr.h>
 #include <fmt/core.h>
 
 #include "mangadex.h"
 
-namespace ranges = std::ranges;
-
-bool writeFile(std::string data, std::string filename) {
+auto writeFile(const std::string &data, const std::string &filename) -> bool {
     std::ofstream outf{filename, std::ios::binary};
     if (!outf) {
         std::cerr << "Failed to write" << filename << std::endl;
-        return 1;
+        return false;
     }
     outf << data;
-    return 0;
+    return true;
 }
 
 // https://stackoverflow.com/a/63050738/4634499
 // Trim beginning spaces
-std::string_view ltrim(std::string_view str) {
+auto ltrim(std::string_view str) -> std::string_view {
     const auto pos(str.find_first_not_of(" \t"));
     str.remove_prefix(pos);
     return str;
 }
 
 // Trim ending spaces
-std::string_view rtrim(std::string_view str) {
+auto rtrim(std::string_view str) -> std::string_view {
     const auto pos(str.find_last_not_of(" \t"));
     str.remove_suffix(str.length() - pos - 1);
     return str;
 }
 
 // Trim both beginning and ending spaces
-std::string_view trim(std::string_view str) {
+auto trim(std::string_view str) -> std::string_view {
     str = ltrim(str);
     str = rtrim(str);
     return str;
 }
 
-void split_string_into_vector(std::string str, char delimiter, std::vector<std::string> &vec) {
-    for (auto split_str : str | ranges::views::split(delimiter) | ranges::views::transform([](auto &&sub) {
+void split_string_into_vector(const std::string &str, const char &delimiter, std::vector<std::string> &vec) {
+// <ranges> is currently (2021-01-04) only availble in gcc 10.x.x, so fallback
+// to using <sstream> method of spliting strings.
+#if __cpp_lib_ranges
+    for (auto split_str : str | std::ranges::views::split(delimiter) | std::ranges::views::transform([](auto &&sub) {
              return std::string_view(&*sub.begin(),
-                 static_cast<std::string_view::size_type>(ranges::distance(sub)));
+                 static_cast<std::string_view::size_type>(std::ranges::distance(sub)));
          })) {
+        // Trim leading and trailing spaces and push into vector
         auto split_str_trimmed{trim(split_str)};
-        vec.push_back(std::string{split_str_trimmed});
+        vec.emplace_back(std::string{split_str_trimmed});
     }
-}
-
-bool boolean_convert(short b) {
-    return b ? true : false;
+#else
+    std::string split_str;
+    std::stringstream ss(str);
+    while (ss.good()) {
+        std::getline(ss, split_str, delimiter);
+        auto split_str_trimmed{trim(split_str)};
+        vec.emplace_back(std::string{split_str_trimmed});
+    }
+#endif
 }
 
 void Manga::prettyPrint() {
@@ -73,33 +88,33 @@ void Manga::prettyPrint() {
         fmt::print("Demograpic: {}\n", demographic_strings.find(demographic)->second);
     }
     fmt::print("Genres:\n");
-    for (auto i : genres) {
+    for (const auto &i : genres) {
         fmt::print("\t{}\n", genre_strings.find(i)->second);
     }
     fmt::print("Alternative name(s):\n");
-    for (auto i : alt_names) {
+    for (const auto &i : alt_names) {
         fmt::print("\t{}\n", i);
     }
     fmt::print("Artists:\n");
-    for (auto i : artists) {
+    for (const auto &i : artists) {
         fmt::print("\t{}\n", i);
     }
     fmt::print("Authors:\n");
-    for (auto i : authors) {
+    for (const auto &i : authors) {
         fmt::print("\t{}\n", i);
     }
     fmt::print("Covers:\n");
-    for (auto i : covers) {
+    for (const auto &i : covers) {
         fmt::print("\t{}\n", BASE_URL + i);
     }
     fmt::print("Related Manga:\n");
-    for (auto i : related_mangas) {
+    for (const auto &i : related_mangas) {
         fmt::print("\tID: {}\n", i.related_manga_id);
         fmt::print("\t\tTitle: {} ({})\n", i.manga_name, related_id_strings.find(i.relation_id)->second);
         fmt::print("\t\tIs Hentai?: {}\n", i.is_related_manga_hentai);
     }
     fmt::print("Chapters:\n");
-    for (auto i : partial_chapters) {
+    for (const auto &i : partial_chapters) {
         fmt::print("\tChapter ID: {}\n", i.id);
         fmt::print("\t\tTimestamp: {}\n", i.timestamp);
         fmt::print("\t\tVolume: {}\n", i.volume);
@@ -107,14 +122,14 @@ void Manga::prettyPrint() {
         fmt::print("\t\tTitle: {}\n", i.title);
         fmt::print("\t\tTranslated Language: {} ({})\n", i.lang_name, i.lang_code);
         fmt::print("\t\tGroup(s):\n");
-        for (auto &[key, value] : i.groups) {
+        for (const auto &[key, value] : i.groups) {
             fmt::print("\t\t\t{} -> {}\n", key, value);
         }
     }
     fmt::print("Size of list: {}\n", partial_chapters.size());
 }
 
-Manga::Manga(std::string manga_id, const nlohmann::json &json) {
+Manga::Manga(const std::string &manga_id, const nlohmann::json &json) {
     // Reserve space in vector capacity to be at least enough to contain "n" amount of elements
     genres.reserve(8);
     artists.reserve(2);
@@ -125,7 +140,7 @@ Manga::Manga(std::string manga_id, const nlohmann::json &json) {
     id = std::stoul(manga_id);                                              //id
     cover_url = json["manga"]["cover_url"].get<std::string>();              //cover_url
     description = json["manga"]["description"].get<std::string>();          //description
-    is_hentai = boolean_convert(json["manga"]["hentai"]);                   //is_hentai
+    is_hentai = json["manga"]["hentai"];                                    //is_hentai
     pub_status = json["manga"]["status"].get<short>();                      //pub_status
     demographic = json["manga"]["demographic"].get<short>();                //demographic
     title = json["manga"]["title"].get<std::string>();                      // title
@@ -134,12 +149,13 @@ Manga::Manga(std::string manga_id, const nlohmann::json &json) {
     genres = json["manga"]["genres"].get<std::vector<short>>();             //genres
     alt_names = json["manga"]["alt_names"].get<std::vector<std::string>>(); //alt_names
     // TODO: Handle null values in below areas
-    std::string artists_string = json["manga"]["artist"].get<std::string>();
-    std::string authors_string = json["manga"]["author"].get<std::string>();
+    auto artists_string = json["manga"]["artist"].get<std::string>();
+    auto authors_string = json["manga"]["author"].get<std::string>();
     split_string_into_vector(artists_string, ',', artists);                   //artists
     split_string_into_vector(authors_string, ',', authors);                   //authors
     covers = json["manga"]["covers"].get<std::list<std::string>>();           //covers
     links = json["manga"]["links"].get<std::map<std::string, std::string>>(); //links
+    last_updated = json["manga"]["last_updated"].get<unsigned long>();        //last_updated
 
     // related_mangas
     for (auto &rel : json["manga"]["related"].items()) {
@@ -148,7 +164,7 @@ Manga::Manga(std::string manga_id, const nlohmann::json &json) {
         related.relation_id = rel.value()["relation_id"].get<short>();
         related.related_manga_id = rel.value()["related_manga_id"].get<int>();
         related.manga_name = rel.value()["manga_name"].get<std::string>();
-        related.is_related_manga_hentai = boolean_convert(rel.value()["manga_hentai"]);
+        related.is_related_manga_hentai = rel.value()["manga_hentai"];
 
         //Push related mangas into a vector
         related_mangas.push_back(related);
@@ -202,14 +218,16 @@ void Manga::fetchChapter(Chapter &chapter, const nlohmann::json &json) {
     chapter.page_array = json["page_array"].get<std::list<std::string>>();
 }
 
-bool Manga::downloadChapter(const Chapter &chapter, std::string output_directory) {
+auto Manga::downloadChapter(const Chapter &chapter, const std::string &output_directory) -> bool {
     fmt::print("Downloading.\nOutput Directory: {}\n", output_directory);
 
-    for (auto i : chapter.page_array) {
-        std::string page_url = chapter.server_url + chapter.manga_hash + "/" + i;
+    for (const auto &page : chapter.page_array) {
+        std::string page_url = chapter.server_url + chapter.manga_hash + "/" + page;
         cpr::Response r = cpr::Get(cpr::Url{page_url});
-        std::string out = output_directory + "/" + i;
-        writeFile(r.text, out);
+        std::string output = output_directory;
+        output.append("/");
+        output.append(page);
+        writeFile(r.text, output);
     };
-    return 0;
+    return true;
 }

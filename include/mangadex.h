@@ -92,7 +92,7 @@ class Manga {
   public:
     struct Chapter : PartialChapter {
         bool long_strip;
-        unsigned long id;
+        unsigned long id; //Duplicated derivied variable. FIXME
         std::string chapter_status;
         std::string manga_hash;
         std::string server_url;
@@ -100,10 +100,10 @@ class Manga {
         std::list<std::string> page_array;
         // TODO Handle the external data option e.g. https://mangadex.org/api/chapter/670701
     };
-    Manga(std::string, const nlohmann::json &); // Constructor
+    Manga(const std::string &, const nlohmann::json &); // Constructor
     void prettyPrint();
-    void fetchChapter(Chapter &, const nlohmann::json &);
-    bool downloadChapter(const Chapter &, std::string);
+    static void fetchChapter(Chapter &, const nlohmann::json &);
+    static bool downloadChapter(const Chapter &, const std::string &);
 };
 
 #endif // SRC_MANGADEX_H

@@ -1,5 +1,4 @@
 ---
-Checks:             '*'
-WarningsAsErrors    '*'
+Checks:             "*, -cppcoreguidelines-avoid-magic-numbers, -fuchsia-default-arguments-calls, -fuchsia-trailing-return, -google-runtime-int, -google-readability-todo, -readability-magic-numbers"
 HeaderFilterRegex:  ''
 FormatStyle:        file

@@ -1,5 +1,5 @@
-#ifndef SRC_MANGADEX_H
-#define SRC_MANGADEX_H
+#ifndef INCLUDE_MANGADEX_H
+#define INCLUDE_MANGADEX_H
 
 #include <list>
 #include <map>
@@ -103,7 +103,7 @@ class Manga {
     Manga(const std::string &, const nlohmann::json &); // Constructor
     void prettyPrint();
     static void fetchChapter(Chapter &, const nlohmann::json &);
-    static bool downloadChapter(const Chapter &, const std::string &);
+    static auto downloadChapter(const Chapter &, const std::string &) -> bool;
 };
 
-#endif // SRC_MANGADEX_H
+#endif // INCLUDE_MANGADEX_H

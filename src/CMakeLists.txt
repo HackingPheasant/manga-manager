@@ -31,7 +31,9 @@ FetchContent_MakeAvailable(cpr)
 FetchContent_MakeAvailable(json)
 FetchContent_MakeAvailable(fmt)
 # Compile program
-add_executable(${PROJECT_NAME} mangadex.cpp main.cpp)
+add_executable(${PROJECT_NAME} mangadex.cpp
+                               main.cpp
+                               string_manipulation.cpp)
 
 # Set the directories that should be included in the build command for this target
 # when running g++ these will be included as -I/directory/path/

@@ -97,8 +97,8 @@ Manga::Manga(const std::string &manga_id, const nlohmann::json &json) {
     // TODO: Handle null values in below areas
     auto artists_string = json["manga"]["artist"].get<std::string>();
     auto authors_string = json["manga"]["author"].get<std::string>();
-    strings::split_into_vector(artists_string, ',', artists);                 //artists
-    strings::split_into_vector(authors_string, ',', authors);                 //authors
+    artists = strings::split(artists_string, ',');                            //artists
+    authors = strings::split(authors_string, ',');                            //authors
     covers = json["manga"]["covers"].get<std::list<std::string>>();           //covers
     links = json["manga"]["links"].get<std::map<std::string, std::string>>(); //links
     last_updated = json["manga"]["last_updated"].get<unsigned long>();        //last_updated

@@ -36,9 +36,11 @@ auto trim(std::string_view str) -> std::string_view {
     return str;
 }
 
-void split_into_vector(const std::string &str, const char &delimiter, std::vector<std::string> &vec) {
-// <ranges> is currently (2021-01-04) only availble in gcc 10.x.x, so fallback
-// to using <sstream> method of spliting strings.
+auto split(const std::string &str, const char &delimiter) -> std::vector<std::string> {
+    std::vector<std::string> vec;
+
+    // <ranges> is currently (2021-01-04) only availble in gcc 10.x.x, so fallback
+    // to using <sstream> method of spliting strings.
 #if __cpp_lib_ranges
     for (auto split_str : str | std::ranges::views::split(delimiter) | std::ranges::views::transform([](auto &&sub) {
              return std::string_view(&*sub.begin(),
@@ -57,5 +59,6 @@ void split_into_vector(const std::string &str, const char &delimiter, std::vecto
         vec.emplace_back(std::string{split_str_trimmed});
     }
 #endif
+    return vec;
 }
 } // namespace strings

@@ -9,59 +9,64 @@
 #include <nlohmann/json.hpp>
 
 const std::string BASE_URL = "https://mangadex.org";
-const std::string MANGA_API = BASE_URL + "/api/manga/";
-const std::string CHAPTER_API = BASE_URL + "/api/chapter/";
+const std::string MANGA_API = BASE_URL + "/api/v2/manga/";
+const std::string CHAPTER_API = BASE_URL + "/api/v2/chapter/";
 
 // Based off https://github.com/md-y/mangadex-full-api
-/* Notes for reference
-ChapterType != "OK" then {
-    // Hosted and readable on MangaDex
-    0 = "Internal",
-    // Hosted but not yet readable on MangaDex
-    1 = "Delayed",
-    // Not hosted on MangaDex
-    2 = "External"
-}
-*/
 
 class Manga {
   private:
+    struct Covers {
+        std::string volume;
+        std::string url;
+    };
     struct RelatedManga {
-        bool is_related_manga_hentai;
-        short relation_id;
-        int related_manga_id;
-        std::string manga_name;
+        bool is_hentai;
+        short type;
+        long id;
+        std::string title;
+    };
+    struct Groups {
+        long id;
+        std::string name;
     };
     struct PartialChapter {
-        unsigned long timestamp; // Year 2038 problem avoided (for now)
-        std::string id;
+        long timestamp;
+        long uploader;
+        long chapter_id;
+        long manga_id;
+        std::string chapter_title;
+        std::string manga_title;
         std::string volume;
         std::string chapter;
-        std::string title;
-        std::string lang_name;
-        std::string lang_code;
-        std::map<int, std::string> groups;
+        std::string translated_lang_flag;
+        std::string chapter_hash;
+        std::vector<unsigned int> groups;
+        std::vector<Groups> groups_reference;
     };
-    bool is_hentai; // Should see about converting to bool
-    short pub_status;
+    bool is_hentai;
+    short publication_status;
     short demographic;
-    unsigned long id;
-    unsigned long last_updated;
+    long id;
+    long last_uploaded;
     std::string title;
     std::string description;
-    std::string cover_url;
-    std::string orig_lang_name;
-    std::string orig_lang_flag;
-    std::list<std::string> covers;
+    std::string main_cover;
+    std::string original_lang_flag;
+    std::string last_chapter;
+    std::string last_volume;
     std::list<PartialChapter> partial_chapters;
-    std::vector<short> genres;
-    std::vector<std::string> alt_names;
+    std::vector<short> tags;
+    std::vector<std::string> alt_titles;
     std::vector<std::string> artists;
     std::vector<std::string> authors;
+    std::vector<Covers> covers;
     std::vector<RelatedManga> related_mangas;
     std::map<std::string, std::string> links;
     // Translate int->string
-    const std::map<int, std::string> genre_strings = {
+    const std::map<int, std::string> tags_strings = {
+        // Refernce below link to define what "tags" fall into which content groups. TODO
+        // https://mangadex.org/api/v2/tag
         {1, "4-Koma"}, {2, "Action"}, {3, "Adventure"}, {4, "Award Winning"}, {5, "Comedy"},
         {6, "Cooking"}, {7, "Doujinshi"}, {8, "Drama"}, {9, "Ecchi"}, {10, "Fantasy"},
         {11, "Gyaru"}, {12, "Harem"}, {13, "Historical"}, {14, "Horror"}, {16, "Martial Arts"},
@@ -81,29 +86,49 @@ class Manga {
         {84, "Mafia"}};
     const std::map<int, std::string> demographic_strings = {
         {1, "Shounen"}, {2, "Shoujo"}, {3, "Seinen"}, {4, "Josei"}};
-    const std::map<int, std::string> pub_status_strings = {
+    const std::map<int, std::string> publication_status_strings = {
         {1, "Ongoing"}, {2, "Completed"}, {3, "Cancelled"}, {4, "Hiatus"}};
-    const std::map<int, std::string> related_id_strings = {
+    const std::map<int, std::string> relation_type_strings = {
+        // Refernce below link to define what relations are "linked"
+        // https://mangadex.org/api/v2/relations
         {1, "Prequel"}, {2, "Sequel"}, {3, "Adapted from"}, {4, "Spin-off"}, {5, "Side story"},
         {6, "Main story"}, {7, "Alternate story"}, {8, "Doujinshi"}, {9, "Based on"}, {10, "Coloured"},
         {11, "Monochrome"}, {12, "Shared universe"}, {13, "Same franchise"}, {14, "Pre-serialization"},
         {15, "Serialization"}};
+    // Translate lang_flag -> lang_name
+    const std::map<std::string, std::string> language_code_names = {
+        {"sa", "Arabic"}, {"bd", "Bengali"}, {"bg", "Bulgarian"}, {"mm", "Burmese"}, {"ct", "Catalan"},
+        {"cn", "Chinese (Simp)"}, {"hk", "Chinese (Trad)"}, {"cz", "Czech"}, {"dk", "Danish"}, {"nl", "Dutch"},
+        {"gb", "English"}, {"ph", "Filipino"}, {"fi", "Finnish"}, {"fr", "French"}, {"de", "German"},
+        {"gr", "Greek"}, {"hu", "Hungarian"}, {"id", "Indonesian"}, {"it", "Italian"}, {"jp", "Japanese"},
+        {"kr", "Korean"}, {"lt", "Lithuanian"}, {"my", "Malay"}, {"mn", "Mongolian"}, {"ir", "Persian"},
+        {"pl", "Polish"}, {"br", "Portuguese (Br)"}, {"pt", "Portuguese (Pt)"}, {"ro", "Romanian"}, {"ru", "Russian"},
+        {"rs", "Serbo-Croatian"}, {"es", "Spanish (Es)"}, {"mx", "Spanish (LATAM)"}, {"se", "Swedish"}, {"th", "Thai"},
+        {"tr", "Turkish"}, {"ua", "Ukrainian"}, {"vn", "Vietnamese"}};
 
   public:
     struct Chapter : PartialChapter {
-        bool long_strip;
-        unsigned long id; //Duplicated derivied variable. FIXME
+        /* Notes for reference
+         * ChapterStatus != "OK" then {
+         *  0 = "Internal" -> Hosted and readable on MangaDex
+         *  1 = "Delayed" -> Hosted but not yet readable on MangaDex
+         *  2 = "External" -> Not hosted on MangaDex
+         * }
+         */
         std::string chapter_status;
-        std::string manga_hash;
         std::string server_url;
-        std::string server_url_fallback;
-        std::list<std::string> page_array;
+        std::string server_url_fallback; // Not allways available in json
+        std::string group_website;       // Only in json if chapter_status == delayed
+        std::vector<std::string> pages;  // Pages stops being an array when chapter_status == external
+        // id: 9097/name: MangaPlus, are the only one so far that gets the "exernal" status
         // TODO Handle the external data option e.g. https://mangadex.org/api/chapter/670701
     };
-    Manga(const std::string &, const nlohmann::json &); // Constructor
+    Manga(const nlohmann::json &); // Constructor
     void prettyPrint();
-    static void fetchChapter(Chapter &, const nlohmann::json &);
-    static auto downloadChapter(const Chapter &, const std::string &) -> bool;
+    void fetchAllCovers(const nlohmann::json &);
+    void fetchPartialChapters(const nlohmann::json &);
+    void fetchFullChapters(Chapter &, const nlohmann::json &);
+    auto downloadChapter(const Chapter &, const std::string &) -> bool;
 };
 
 #endif // INCLUDE_MANGADEX_H

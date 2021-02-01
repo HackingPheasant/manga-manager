@@ -73,8 +73,19 @@ auto main(int argc, const char **argv) -> int {
     if (response.status_code != 200) {
         throw std::runtime_error(fmt::format("Unable to download info for manga \"{}\"\n Status code : {}", manga_id, response.status_code));
     }
+    Manga manga(json);
 
-    Manga manga(manga_id, json);
+    // Lets fill in some of the nested objects
+    // Covers
+    std::string manga_covers_url = MANGA_API + manga_id + "/covers";
+    response = cpr::Get(cpr::Url{manga_covers_url});
+    json = nlohmann::json::parse(response.text);
+    manga.fetchAllCovers(json);
+    // Partial Chapters
+    std::string manga_chapters_url = MANGA_API + manga_id + "/chapters";
+    response = cpr::Get(cpr::Url{manga_chapters_url});
+    json = nlohmann::json::parse(response.text);
+    manga.fetchPartialChapters(json);
 
     manga.prettyPrint();
 
@@ -101,7 +112,7 @@ auto main(int argc, const char **argv) -> int {
 
         // Nested Objected (Chapter) created, then the data will be filled in with the fetchChapter function
         Manga::Chapter chapter;
-        manga.fetchChapter(chapter, json);
+        manga.fetchFullChapters(chapter, json);
         manga.downloadChapter(chapter, output_directory);
 
         // Ask user if they want to download more chapters

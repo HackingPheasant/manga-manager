@@ -41,7 +41,7 @@ class Manga {
         std::string chapter;
         std::string translated_lang_flag;
         std::string chapter_hash;
-        std::vector<unsigned int> groups;
+        std::vector<int> groups;
         std::vector<Groups> groups_reference;
     };
     bool is_hentai;

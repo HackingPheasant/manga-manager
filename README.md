@@ -13,7 +13,10 @@ Manga manger and downloader built with C++
 3. Install
     ```bash 
     cmake --install build # CMake 3.15+ only
-    
+    ```
+4. Clean
+    ```bash
+    cmake --build build/ --target clean
     ```
 
 **Notes:**

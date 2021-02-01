@@ -1,9 +1,9 @@
 # Project specific settings
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.15...3.19)
 project(mangadex-dl
         VERSION 0.1.0 
-        DESCRIPTION "Mangadex downloader, built with C++"
-        HOMEPAGE_URL https://github.com/HackingPheasant/mangadex-dl
+        DESCRIPTION "Manga manager, built with C++"
+        HOMEPAGE_URL https://github.com/HackingPheasant/manga-manager
         LANGUAGES CXX)
 include(cmake/StandardProjectSettings.cmake)
 include(cmake/PreventInSourceBuilds.cmake)

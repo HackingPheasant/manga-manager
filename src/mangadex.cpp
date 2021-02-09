@@ -27,11 +27,17 @@ Manga::Manga(const nlohmann::json &json) {
     publication_status = json["data"]["publication"]["status"].get<short>();         //publication_status
     demographic = json["data"]["publication"]["demographic"].get<short>();           //demographic
     tags = json["data"]["tags"].get<std::vector<short>>();                           //tags
-    last_chapter = json["data"]["lastChapter"].get<std::string>();                   //last_chapter
-    last_volume = json["data"]["lastVolume"].get<std::string>();                     //last_volume
-    is_hentai = json["data"]["isHentai"];                                            //is_hentai
-    links = json["data"]["links"].get<std::map<std::string, std::string>>();         //links
-    for (auto &rel : json["data"]["relations"].items()) {                            //related_mangas
+    if (!(json["data"]["lastChapter"].empty())) {
+        last_chapter = json["data"]["lastChapter"].get<std::string>(); //last_chapter
+    }
+    if (!(json["data"]["lastVolume"].empty())) {
+        last_volume = json["data"]["lastVolume"].get<std::string>(); //last_volume
+    }
+    is_hentai = json["data"]["isHentai"]; //is_hentai
+    if (!(json["data"]["links"].empty())) {
+        links = json["data"]["links"].get<std::map<std::string, std::string>>(); //links
+    }
+    for (auto &rel : json["data"]["relations"].items()) { //related_mangas
         RelatedManga related;
 
         related.id = rel.value()["id"].get<long>();              //id
@@ -184,7 +190,6 @@ void Manga::prettyPrint() {
         }
         fmt::print("\t\tUploader ID: {}\n", i.uploader);
         fmt::print("\t\tTimestamp: {}\n", i.timestamp);
-
     }
     fmt::print("Size of chapter list: {}\n", partial_chapters.size());
 }

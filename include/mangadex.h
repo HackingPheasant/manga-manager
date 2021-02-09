@@ -26,10 +26,6 @@ class Manga {
         long id;
         std::string title;
     };
-    struct Groups {
-        long id;
-        std::string name;
-    };
     struct PartialChapter {
         long timestamp;
         long uploader;
@@ -42,7 +38,7 @@ class Manga {
         std::string translated_lang_flag;
         std::string chapter_hash;
         std::vector<int> groups;
-        std::vector<Groups> groups_reference;
+        std::map<long, std::string> groups_reference;
     };
     bool is_hentai;
     short publication_status;

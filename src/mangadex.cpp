@@ -79,15 +79,9 @@ void Manga::fetchPartialChapters(const nlohmann::json &json) {
         chapter.groups = chap.value()["groups"].get<std::vector<int>>();            //groups
         chapter.uploader = chap.value()["uploader"].get<long>();                    //uploader
         chapter.timestamp = chap.value()["timestamp"].get<long>();                  //timestamp
-
+        //TODO Use uploader name if group == "unknown" (group: 2) or "no group" (group: 657)
         for (auto &group_info : json["data"]["groups"].items()) {
-            Groups group;
-
-            group.id = group_info.value()["id"].get<long>();            //id
-            group.name = group_info.value()["name"].get<std::string>(); //name
-
-            // Push group object into a vector
-            chapter.groups_reference.push_back(group);
+            chapter.groups_reference.try_emplace(group_info.value()["id"].get<long>(), group_info.value()["name"].get<std::string>());
         }
 
         // Push chapter object into a list
@@ -105,13 +99,7 @@ void Manga::fetchFullChapters(Chapter &chapter, const nlohmann::json &json) {
     chapter.chapter_title = json["data"]["title"].get<std::string>();           //chapter_title
     chapter.translated_lang_flag = json["data"]["language"].get<std::string>(); //translated_lang_flag
     for (auto &group_info : json["data"]["groups"].items()) {                   //groups_reference
-        Groups group;
-
-        group.id = group_info.value()["id"].get<long>();            //id
-        group.name = group_info.value()["name"].get<std::string>(); //name
-
-        // Push group object into a vector
-        chapter.groups_reference.push_back(group);
+            chapter.groups_reference.try_emplace(group_info.value()["id"].get<long>(), group_info.value()["name"].get<std::string>());
     }
     chapter.uploader = json["data"]["uploader"].get<long>();               //uploader
     chapter.timestamp = json["data"]["timestamp"].get<long>();             //timestamp
@@ -185,8 +173,7 @@ void Manga::prettyPrint() {
         fmt::print("\t\tGroup(s):\n");
         for (const auto &group_id : i.groups) {
             // TODO match group id to group name
-            auto group_name = "GROUP NAME PLACEHOLDER";
-            fmt::print("\t\t\t{} -> {}\n", group_id, group_name);
+            fmt::print("\t\t\t{} -> {}\n", group_id, i.groups_reference.find(group_id)->second);
         }
         fmt::print("\t\tUploader ID: {}\n", i.uploader);
         fmt::print("\t\tTimestamp: {}\n", i.timestamp);

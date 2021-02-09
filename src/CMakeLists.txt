@@ -2,6 +2,12 @@
 include(FetchContent)
 
 # lib configuration
+#json
+if (NOT DEFINED JSON_BuildTests)
+    set(JSON_BuildTests OFF)
+endif()
+
+#cpr
 if (NOT DEFINED BUILD_CPR_TESTS)
     set(BUILD_CPR_TESTS OFF)
 endif()
@@ -10,11 +16,15 @@ if (NOT DEFINED BUILD_CPR_TESTS_SSL)
     set(BUILD_CPR_TESTS_SSL OFF)
 endif()
 
+if (NOT DEFINED USE_SYSTEM_CURL)
+    set(USE_SYSTEM_CURL ON)
+endif()
+
 # Grab dependencies
 FetchContent_Declare(
     cpr
     GIT_REPOSITORY https://github.com/whoshuu/cpr.git
-    GIT_TAG 1.5.2
+    GIT_TAG c34ddb9
     )
 FetchContent_Declare(
     json

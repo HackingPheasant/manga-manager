@@ -63,7 +63,6 @@ auto main(int argc, const char **argv) -> int {
     // Contruct API url for manga and get JSON response
     std::string manga_api_url = MANGA_API + manga_id;
     cpr::Response response = cpr::Get(cpr::Url{manga_api_url});
-    auto json = nlohmann::json::parse(response.text);
 
     // Handle Errors
     if (response.error) {
@@ -73,6 +72,8 @@ auto main(int argc, const char **argv) -> int {
     if (response.status_code != 200) {
         throw std::runtime_error(fmt::format("Unable to download info for manga \"{}\"\n Status code : {}", manga_id, response.status_code));
     }
+
+    auto json = nlohmann::json::parse(response.text);
     Manga manga(json);
 
     // Lets fill in some of the nested objects
@@ -98,7 +99,6 @@ auto main(int argc, const char **argv) -> int {
         // Contruct API url for chapter and get JSON response
         std::string chapter_api_url = CHAPTER_API + chapter_id;
         response = cpr::Get(cpr::Url{chapter_api_url});
-        json = nlohmann::json::parse(response.text);
 
         // Handle Errors
         // TODO: Maybe make this into a function to remove duplication?
@@ -110,6 +110,7 @@ auto main(int argc, const char **argv) -> int {
             throw std::runtime_error(fmt::format("Unable to download info for chapter \"{}\"\n Status code : {}", chapter_id, response.status_code));
         }
 
+        json = nlohmann::json::parse(response.text);
         // Nested Objected (Chapter) created, then the data will be filled in with the fetchChapter function
         Manga::Chapter chapter;
         manga.fetchFullChapters(chapter, json);

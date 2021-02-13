@@ -172,7 +172,6 @@ void Manga::prettyPrint() {
         fmt::print("\t\tTranslated Language: {}\n", language_code_names.find(i.translated_lang_flag)->second);
         fmt::print("\t\tGroup(s):\n");
         for (const auto &group_id : i.groups) {
-            // TODO match group id to group name
             fmt::print("\t\t\t{} -> {}\n", group_id, i.groups_reference.find(group_id)->second);
         }
         fmt::print("\t\tUploader ID: {}\n", i.uploader);

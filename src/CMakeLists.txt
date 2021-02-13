@@ -40,8 +40,10 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(cpr)
 FetchContent_MakeAvailable(json)
 FetchContent_MakeAvailable(fmt)
+
 # Compile program
-add_executable(${PROJECT_NAME} mangadex.cpp
+add_executable(${PROJECT_NAME} http.cpp
+                               mangadex.cpp
                                main.cpp)
 
 # Set the directories that should be included in the build command for this target

@@ -10,18 +10,20 @@ Manga manger and downloader built with C++
     ```bash
     cmake --build build/
     ```
-3. Install
+3. Run tests *(If ENABLE_TESTING=on)*
+    ```bash
+    cmake --build build/ --target test
+    ```
+4. Install
     ```bash 
     cmake --install build # CMake 3.15+ only
     ```
-4. Clean
+5. Clean
     ```bash
     cmake --build build/ --target clean
     ```
 
 **Notes:**
-This code currently makes use of C++20 Ranges, and at the time of writing (2020-10-03) only GCC 10.1 and upwards has Ranges support.
-
 If you use `cmake --build` instead of directly calling the underlying build system you can use:
 - `-v` for verbose builds (CMake 3.14+)
 - `--parallel N` or `-j N` for parallel builds on *N* amount of cores (CMake 3.12+)

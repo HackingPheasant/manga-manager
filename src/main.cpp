@@ -6,7 +6,7 @@
 #include <nlohmann/json.hpp>
 
 #include "http.h"
-#include "mangadex.h"
+#include "providers/mangadex.h"
 
 static void show_usage(const std::string &name) {
     std::cerr << "Usage: " << name << " [options] <id>\n\n"

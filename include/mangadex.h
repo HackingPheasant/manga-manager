@@ -120,11 +120,10 @@ class Manga {
         // TODO Handle the external data option e.g. https://mangadex.org/api/chapter/670701
     };
     Manga(const nlohmann::json &); // Constructor
-    void prettyPrint();
     void fetchAllCovers(const nlohmann::json &);
-    void fetchPartialChapters(const nlohmann::json &);
-    void fetchFullChapters(Chapter &, const nlohmann::json &);
-    auto downloadChapter(const Chapter &, const std::string &) -> bool;
+    void fetchChapterListing(const nlohmann::json &);
+    void fetchChapter(Chapter &, const nlohmann::json &);
+    void prettyPrint();
 };
 
 #endif // INCLUDE_MANGADEX_H

@@ -18,6 +18,31 @@ static void show_usage(const std::string &name) {
               << std::endl;
 }
 
+auto writeFile(const std::string &data, const std::string &filename) -> bool {
+    std::ofstream outf{filename, std::ios::binary};
+    if (!outf) {
+        std::cerr << "Failed to write" << filename << std::endl;
+        return false;
+    }
+    outf << data;
+    return true;
+}
+
+auto downloadChapter(const Manga::Chapter &chapter, const std::string &output_directory) -> bool {
+    fmt::print("Downloading.\nOutput Directory: {}\n", output_directory);
+
+    for (const auto &page : chapter.pages) {
+        std::string page_url = chapter.server_url + chapter.chapter_hash + "/" + page;
+        // TODO Make use of server fallback url
+        auto response = http::get(page_url);
+        std::string output = output_directory;
+        output.append("/");
+        output.append(page);
+        writeFile(response.text, output);
+    };
+    return true;
+}
+
 auto main(int argc, const char **argv) -> int {
     // TODO: Fix this very crude commandline parsing
     if (argc < 2) {
@@ -79,7 +104,7 @@ auto main(int argc, const char **argv) -> int {
     // Partial Chapters
     response = http::get(manga_chapters_url);
     json = nlohmann::json::parse(response.text);
-    manga.fetchPartialChapters(json);
+    manga.fetchChapterListing(json);
 
     // Print it all to the terminal :)
     manga.prettyPrint();
@@ -97,8 +122,8 @@ auto main(int argc, const char **argv) -> int {
 
         // Nested Objected (Chapter) created, then the data will be filled in with the fetchChapter function
         Manga::Chapter chapter;
-        manga.fetchFullChapters(chapter, json);
-        manga.downloadChapter(chapter, output_directory);
+        manga.fetchChapter(chapter, json);
+        downloadChapter(chapter, output_directory);
 
         // Ask user if they want to download more chapters
         fmt::print("Download more chapters? (y/n)\n");

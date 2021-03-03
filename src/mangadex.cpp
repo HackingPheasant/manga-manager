@@ -1,7 +1,6 @@
 #include <fstream>
 #include <iostream>
 
-#include <cpr/cpr.h>
 #include <fmt/core.h>
 
 #include "mangadex.h"
@@ -64,7 +63,7 @@ void Manga::fetchAllCovers(const nlohmann::json &json) {
     }
 }
 
-void Manga::fetchPartialChapters(const nlohmann::json &json) {
+void Manga::fetchChapterListing(const nlohmann::json &json) {
     for (auto &chap : json["data"]["chapters"].items()) { //partial_chapters
         PartialChapter chapter;
 
@@ -89,7 +88,7 @@ void Manga::fetchPartialChapters(const nlohmann::json &json) {
     }
 }
 
-void Manga::fetchFullChapters(Chapter &chapter, const nlohmann::json &json) {
+void Manga::fetchChapter(Chapter &chapter, const nlohmann::json &json) {
     chapter.chapter_id = json["data"]["id"].get<long>();                        //chapter_id
     chapter.chapter_hash = json["data"]["hash"].get<std::string>();             //chapter_hash
     chapter.manga_id = json["data"]["mangaId"].get<long>();                     //manga_id
@@ -99,7 +98,7 @@ void Manga::fetchFullChapters(Chapter &chapter, const nlohmann::json &json) {
     chapter.chapter_title = json["data"]["title"].get<std::string>();           //chapter_title
     chapter.translated_lang_flag = json["data"]["language"].get<std::string>(); //translated_lang_flag
     for (auto &group_info : json["data"]["groups"].items()) {                   //groups_reference
-            chapter.groups_reference.try_emplace(group_info.value()["id"].get<long>(), group_info.value()["name"].get<std::string>());
+        chapter.groups_reference.try_emplace(group_info.value()["id"].get<long>(), group_info.value()["name"].get<std::string>());
     }
     chapter.uploader = json["data"]["uploader"].get<long>();               //uploader
     chapter.timestamp = json["data"]["timestamp"].get<long>();             //timestamp
@@ -114,6 +113,9 @@ void Manga::fetchFullChapters(Chapter &chapter, const nlohmann::json &json) {
     }
 }
 
+// TODO Remove (below and fmt include) once this project is progressed more
+// This program is intended to be a library and something else should handle
+// the display of info
 void Manga::prettyPrint() {
     // Pretty print a few things for testing
     fmt::print("ID: {}\n", id);
@@ -178,28 +180,4 @@ void Manga::prettyPrint() {
         fmt::print("\t\tTimestamp: {}\n", i.timestamp);
     }
     fmt::print("Size of chapter list: {}\n", partial_chapters.size());
-}
-
-auto writeFile(const std::string &data, const std::string &filename) -> bool {
-    std::ofstream outf{filename, std::ios::binary};
-    if (!outf) {
-        std::cerr << "Failed to write" << filename << std::endl;
-        return false;
-    }
-    outf << data;
-    return true;
-}
-
-auto Manga::downloadChapter(const Chapter &chapter, const std::string &output_directory) -> bool {
-    fmt::print("Downloading.\nOutput Directory: {}\n", output_directory);
-
-    for (const auto &page : chapter.pages) {
-        std::string page_url = chapter.server_url + chapter.chapter_hash + "/" + page;
-        cpr::Response r = cpr::Get(cpr::Url{page_url});
-        std::string output = output_directory;
-        output.append("/");
-        output.append(page);
-        writeFile(r.text, output);
-    };
-    return true;
 }

@@ -41,17 +41,32 @@ FetchContent_MakeAvailable(cpr)
 FetchContent_MakeAvailable(json)
 FetchContent_MakeAvailable(fmt)
 
-# Compile program
-add_executable(${PROJECT_NAME} http.cpp
-                               mangadex.cpp
-                               main.cpp)
+# Compile Library
+add_library(${PROJECT_NAME} SHARED
+                            http.cpp
+                            mangadex.cpp)
+
+# Set library versioning information
+set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${PROJECT_VERSION}
+                                                 SOVERSION ${PROJECT_VERSION_MAJOR})
 
 # Set the directories that should be included in the build command for this target
 # when running g++ these will be included as -I/directory/path/
 target_include_directories(${PROJECT_NAME} 
-                           PRIVATE ${PROJECT_SOURCE_DIR}/include)
+                           PUBLIC ${PROJECT_SOURCE_DIR}/include)
+
+# Compile (Test) program
+add_executable("${PROJECT_NAME}-test" main.cpp)
 
 # Link the dependencies with our binary
+target_link_libraries("${PROJECT_NAME}-test"
+                      PRIVATE project_options
+                      PRIVATE project_warnings
+                      PRIVATE cpr::cpr
+                      PRIVATE nlohmann_json::nlohmann_json
+                      PRIVATE fmt::fmt
+                      PRIVATE ${PROJECT_NAME})
+
 target_link_libraries(${PROJECT_NAME}
                       PRIVATE project_options
                       PRIVATE project_warnings

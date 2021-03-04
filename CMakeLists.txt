@@ -1,6 +1,6 @@
 # Project specific settings
-cmake_minimum_required(VERSION 3.15...3.19)
-project(mangadex-dl
+cmake_minimum_required(VERSION 3.15...3.20)
+project(manga-manager
         VERSION 0.1.0 
         DESCRIPTION "Manga manager, built with C++"
         HOMEPAGE_URL https://github.com/HackingPheasant/manga-manager
@@ -67,5 +67,7 @@ endif()
 if (NOT DEFINED CMAKE_ARCHIVE_OUTPUT_DIRECTORY)
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 endif()
+
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 add_subdirectory(src)

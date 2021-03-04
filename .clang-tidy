@@ -1,4 +1,4 @@
 ---
-Checks:             "*, -cppcoreguidelines-avoid-magic-numbers, -fuchsia-default-arguments-calls, -fuchsia-trailing-return, -google-runtime-int, -google-readability-todo, -readability-magic-numbers"
+Checks:             "*, -cppcoreguidelines-avoid-magic-numbers, -fuchsia-default-arguments-calls, -fuchsia-trailing-return, -google-runtime-int, -google-readability-todo, -google-readability-namespace-comments, -hicpp-use-emplace, -readability-magic-numbers"
 HeaderFilterRegex:  ''
 FormatStyle:        file

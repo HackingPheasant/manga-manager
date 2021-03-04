@@ -79,7 +79,7 @@ auto main(int argc, const char **argv) -> int {
         }
 
         if (i + 1 < argc) {
-            allArgs.push_back(argv[i]); // Add all but the last argument to the vector.
+            allArgs.emplace_back(argv[i]); // Add all but the last argument to the vector.
         } else {
             manga_id = argv[i];
         }
@@ -122,7 +122,7 @@ auto main(int argc, const char **argv) -> int {
 
         // Nested Objected (Chapter) created, then the data will be filled in with the fetchChapter function
         Manga::Chapter chapter;
-        manga.fetchChapter(chapter, json);
+        Manga::fetchChapter(chapter, json);
         downloadChapter(chapter, output_directory);
 
         // Ask user if they want to download more chapters
@@ -130,9 +130,7 @@ auto main(int argc, const char **argv) -> int {
         std::string input;
         std::cin >> input;
 
-        if (input == "y") {
-            continue_downloading = true;
-        } else {
+        if (input != "y") {
             continue_downloading = false;
         }
     }

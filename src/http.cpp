@@ -4,7 +4,7 @@
 namespace http {
 auto get(std::string url) -> cpr::Response {
     // TODO Add cookies
-    cpr::Response response = cpr::Get(cpr::Url{url});
+    cpr::Response response = cpr::Get(cpr::Url{std::move(url)});
 
     // Handle Errors
     if (response.error) {
@@ -19,4 +19,4 @@ auto get(std::string url) -> cpr::Response {
     return response;
 }
 
-}
+} // namespace http

@@ -122,7 +122,7 @@ class Manga {
     Manga(const nlohmann::json &); // Constructor
     void fetchAllCovers(const nlohmann::json &);
     void fetchChapterListing(const nlohmann::json &);
-    void fetchChapter(Chapter &, const nlohmann::json &);
+    static void fetchChapter(Chapter &, const nlohmann::json &);
     void prettyPrint();
 };
 

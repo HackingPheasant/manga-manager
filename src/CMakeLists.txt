@@ -59,17 +59,15 @@ target_include_directories(${PROJECT_NAME}
 add_executable("${PROJECT_NAME}-test" main.cpp)
 
 # Link the dependencies with our binary
-target_link_libraries("${PROJECT_NAME}-test"
-                      PRIVATE project_options
-                      PRIVATE project_warnings
-                      PRIVATE cpr::cpr
-                      PRIVATE nlohmann_json::nlohmann_json
-                      PRIVATE fmt::fmt
-                      PRIVATE ${PROJECT_NAME})
-
 target_link_libraries(${PROJECT_NAME}
                       PRIVATE project_options
                       PRIVATE project_warnings
-                      PRIVATE cpr::cpr
-                      PRIVATE nlohmann_json::nlohmann_json
-                      PRIVATE fmt::fmt)
+                      PUBLIC cpr::cpr
+                      PUBLIC nlohmann_json::nlohmann_json
+                      PUBLIC fmt::fmt)
+
+
+target_link_libraries("${PROJECT_NAME}-test"
+                      PRIVATE project_options
+                      PRIVATE project_warnings
+                      PRIVATE ${PROJECT_NAME})

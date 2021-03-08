@@ -37,14 +37,12 @@ FetchContent_Declare(
     GIT_TAG 7.1.0
     )
 
-FetchContent_MakeAvailable(cpr)
-FetchContent_MakeAvailable(json)
-FetchContent_MakeAvailable(fmt)
+FetchContent_MakeAvailable(cpr json fmt)
 
 # Compile Library
 add_library(${PROJECT_NAME} SHARED
                             http.cpp
-                            mangadex.cpp)
+                            providers/mangadex.cpp)
 
 # Set library versioning information
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${PROJECT_VERSION}

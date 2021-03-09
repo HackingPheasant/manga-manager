@@ -5,8 +5,12 @@ project(manga-manager
         DESCRIPTION "Manga manager, built with C++"
         HOMEPAGE_URL https://github.com/HackingPheasant/manga-manager
         LANGUAGES CXX)
-include(cmake/StandardProjectSettings.cmake)
-include(cmake/PreventInSourceBuilds.cmake)
+
+# Add cmake helpers to cmake module path
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+
+include(StandardProjectSettings)
+include(PreventInSourceBuilds)
 
 # Link this 'library' to set the c++ standard / compile-time options requested
 add_library(project_options INTERFACE)
@@ -23,18 +27,18 @@ endif()
 add_library(project_warnings INTERFACE)
 
 # enable cache system
-include(cmake/Cache.cmake)
+include(Cache)
 
 # standard compiler warnings
-include(cmake/CompilerWarnings.cmake)
+include(CompilerWarnings)
 set_project_warnings(project_warnings)
 
 # sanitizer options if supported by compiler
-include(cmake/Sanitizers.cmake)
+include(Sanitizers)
 enable_sanitizers(project_options)
 
 # allow for static analysis options
-include(cmake/StaticAnalyzers.cmake)
+include(StaticAnalyzers)
 
 # Shared libs (.dll/.so) or Static libs (.lib/.a)
 option(BUILD_SHARED_LIBS "Enable compilation of shared libraries" OFF)

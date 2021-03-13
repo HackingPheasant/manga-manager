@@ -53,6 +53,18 @@ set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${PROJECT_VERSION}
 target_include_directories(${PROJECT_NAME} 
                            PUBLIC ${PROJECT_SOURCE_DIR}/include)
 
+# Check (and enable) position independent code
+include(CheckPIESupported)
+# Retrieve any error message.
+check_pie_supported(OUTPUT_VARIABLE output LANGUAGES CXX)
+# Only explicitly enable it for cpr/fmt since thats whats causing the errors
+set_property(TARGET cpr PROPERTY POSITION_INDEPENDENT_CODE TRUE)
+set_property(TARGET fmt PROPERTY POSITION_INDEPENDENT_CODE TRUE)
+if(NOT CMAKE_CXX_LINK_PIE_SUPPORTED)
+  message(WARNING "PIE is not supported at link time: ${output}.\n"
+                  "PIE link options will not be passed to linker.")
+endif()
+
 # Compile (Test) program
 add_executable("${PROJECT_NAME}-test" main.cpp)
 

@@ -1,5 +1,5 @@
 # Project specific settings
-cmake_minimum_required(VERSION 3.15...3.20)
+cmake_minimum_required(VERSION 3.16...3.20)
 project(manga-manager
         VERSION 0.1.0 
         DESCRIPTION "Manga manager, built with C++"
@@ -23,15 +23,11 @@ if(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
   endif()
 endif()
 
-# Link this 'library' to use the warnings specified in CompilerWarnings.cmake
-add_library(project_warnings INTERFACE)
-
 # enable cache system
 include(Cache)
 
 # standard compiler warnings
 include(CompilerWarnings)
-set_project_warnings(project_warnings)
 
 # sanitizer options if supported by compiler
 include(Sanitizers)

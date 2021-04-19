@@ -3,7 +3,7 @@
 
 #include <fmt/core.h>
 
-#include "providers/mangadex.h"
+#include <manga-manager/providers/mangadex.h>
 
 Manga::Manga(const nlohmann::json &json) {
     // Reserve space in vector capacity to be at least enough to initially

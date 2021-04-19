@@ -47,12 +47,12 @@ To use a compiler different to the system default:
 ## Thanks to the following projects
 Listed in no particular order
 
-- [cpp_starter_project](https://github.com/lefticus/cpp_starter_project) for some CMake knowledge
+- [cpp_starter_project](https://github.com/lefticus/cpp_starter_project) and [adobe/lagrange](https://github.com/adobe/lagrange) for the knowledge and inspiring the CMake related stuff.
 - [nlohmann/json](https://github.com/nlohmann/json/) C++ JSON library
-- [whoshuu/cpr](https://github.com/whoshuu/cpr) C++ Requests wrapper around libcurl to simplify usage in code
+- [whoshuu/cpr](https://github.com/whoshuu/cpr) C++ Requests wrapper around [curl](https://github.com/curl/curl) to simplify usage in code
 - [fmtlib/fmt](https://github.com/fmtlib/fmt) A modern formatting library
 - [CMake](https://cmake.org/)
-- [bibo5088/mangadex-downloader](https://github.com/bibo5088/mangadex-downloader/) Mangadex downloader partially based off this project
+- [bibo5088/mangadex-downloader](https://github.com/bibo5088/mangadex-downloader/) Mangadex downloader, inspired the beginning of this project
 
 ## License
 This program is available to anybody free of charge, under the terms of MIT License (see [LICENSE](LICENSE)).

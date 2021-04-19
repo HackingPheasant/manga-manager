@@ -1,6 +1,8 @@
 #include <cpr/cpr.h>
 #include <fmt/core.h>
 
+#include <manga-manager/http.h>
+
 namespace http {
 auto get(std::string url) -> cpr::Response {
     // TODO Add cookies

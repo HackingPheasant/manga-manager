@@ -1,12 +1,13 @@
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <vector>
 
 #include <fmt/core.h> // Will change to std::format when compilers support it
 #include <nlohmann/json.hpp>
 
-#include "http.h"
-#include "providers/mangadex.h"
+#include <manga-manager/http.h>
+#include <manga-manager/providers/mangadex.h>
 
 static void show_usage(const std::string &name) {
     std::cerr << "Usage: " << name << " [options] <id>\n\n"

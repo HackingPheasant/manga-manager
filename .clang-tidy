@@ -1,4 +1,20 @@
 ---
-Checks:             "*, -cppcoreguidelines-avoid-magic-numbers, -fuchsia-default-arguments-calls, -fuchsia-trailing-return, -google-runtime-int, -google-readability-todo, -google-readability-namespace-comments, -hicpp-use-emplace, -readability-magic-numbers"
+Checks:             "*,
+                    -cppcoreguidelines-avoid-magic-numbers,
+                    -fuchsia-default-arguments-calls,
+                    -fuchsia-trailing-return,
+                    -google-readability-braces-around-statements,
+                    -google-readability-namespace-comments,
+                    -google-readability-todo,
+                    -google-runtime-int,
+                    -hicpp-avoid-c-arrays,
+                    -hicpp-braces-around-statements,
+                    -hicpp-deprecated-headers,
+                    -hicpp-no-malloc,
+                    -hicpp-uppercase-literal-suffix,
+                    -hicpp-use-auto,
+                    -hicpp-use-emplace,
+                    -hicpp-vararg,
+                    -readability-magic-numbers"
 HeaderFilterRegex:  ''
 FormatStyle:        file

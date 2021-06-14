@@ -1,0 +1,144 @@
+{
+    "version": 2,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 20,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "base",
+            "displayName": "Base",
+            "description": "Base configuration",
+            "hidden": true,
+            "generator": "Unix Makefiles",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS" : "ON"
+            }
+        },
+        {
+            "inherits": "base",
+            "name": "debug",
+            "displayName": "Debug",
+            "description": "Build as Debug",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "inherits": [
+                "base",
+                "debug"
+            ],
+            "name": "dev",
+            "displayName": "Developer",
+            "description": "Build as Debug, with warnings enabled.",
+            "cacheVariables": {
+                "ENABLE_WARNINGS": "TRUE"
+            },
+            "warnings": {
+                "dev": false,
+                "deprecated": true,
+                "uninitialized": true,
+                "systemVars": true
+            },
+            "errors": {
+                "dev": false,
+                "deprecated": true
+            }
+        },
+        {
+            "inherits": "base",
+            "name": "release",
+            "displayName": "Release",
+            "description": "Build as Release",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "inherits": [
+                "base",
+                "release"
+            ],
+            "name": "release-static-libs",
+            "displayName": "Release (Static libs)",
+            "description": "Build as Release, forcing static built libraries",
+            "cacheVariables": {
+                "BUILD_SHARED_LIBS": "OFF"
+            }
+        },
+        {
+            "inherits": [
+                "base",
+                "release"
+            ],
+            "name": "release-shared-libs",
+            "displayName": "Release (Shared libs)",
+            "description": "Build as Release, forcing shared built libraries",
+            "cacheVariables": {
+                "BUILD_SHARED_LIBS": "ON"
+            }
+        },
+        {
+            "inherits": "base",
+            "name": "relwithdebinfo",
+            "displayName": "RelWithDebInfo",
+            "description": "Build as Release with Debug Info",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+            }
+        },
+        {
+            "inherits": "base",
+            "name": "minsizerel",
+            "displayName": "MinSizeRel",
+            "description": "Build as Release, optimizing for size",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "MinSizeRel"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "debug",
+            "configurePreset": "debug",
+            "jobs": 4
+        },
+        {
+            "name": "dev",
+            "configurePreset": "dev",
+            "jobs": 4
+        },
+        {
+            "name": "release",
+            "configurePreset": "release",
+            "jobs": 4
+        },
+        {
+            "name": "release-static-libs",
+            "configurePreset": "release-static-libs",
+            "jobs": 4
+        },
+        {
+            "name": "release-shared-libs",
+            "configurePreset": "release-shared-libs",
+            "jobs": 4
+        },
+        {
+            "name": "relwithdebinfo",
+            "configurePreset": "relwithdebinfo",
+            "jobs": 4
+        },
+        {
+            "name": "minsizerel",
+            "configurePreset": "minsizerel",
+            "jobs": 4
+        }
+
+    ],
+    "testPresets": [
+    ]
+}

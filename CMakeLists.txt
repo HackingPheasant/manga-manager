@@ -1,5 +1,5 @@
 # Project specific settings
-cmake_minimum_required(VERSION 3.16...3.20)
+cmake_minimum_required(VERSION 3.20)
 project(manga-manager
     VERSION 0.1.0
     DESCRIPTION "Manga manager, built with C++"
@@ -37,11 +37,16 @@ enable_sanitizers(project_options)
 # allow for static analysis options
 include(StaticAnalyzers)
 
+# allow for cmake options to depend on other options
+include(CMakeDependentOption)
+
 # Options
+option(ENABLE_WARNINGS "Enable compiler warnings" FALSE)
+# Off by default, feel free to switch to on by default if you current builds have zero errors
+cmake_dependent_option(ENABLE_WARNINGS_AS_ERRORS "Treat compiler warnings as errors" FALSE "ENABLE_WARNINGS" ON)
+# We should at least ENABLE_TESTING when we have some tests
 option(ENABLE_TESTING "Enable Test Builds" OFF) 
 option(ENABLE_FUZZING "Enable Fuzzing Builds" OFF)
-# Shared libs (.dll/.so) or Static libs (.lib/.a)
-option(BUILD_SHARED_LIBS "Enable compilation of shared libraries" OFF)
 option(BUILD_DOCUMENTATION "Build documentation" OFF)
 option(BUILD_EXAMPLES  "Build all examples" OFF)
 

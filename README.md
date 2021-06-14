@@ -2,47 +2,39 @@
 Manga manger and downloader built with C++
 
 ## Build
-1. Setup (Create build directory, run build generation system and grab dependencies)
+1. Configure
     ```bash
-    cmake . -B build
+    cmake --preset <name>
     ```
 2. Build
     ```bash
-    cmake --build build/
+    cmake --build --preset <name>
     ```
-3. Run tests *(If ENABLE_TESTING=on)*
+3. Install
     ```bash
-    cmake --build build/ --target test
+    cmake --install --preset <name> # CMake 3.15+ only
     ```
-4. Install
-    ```bash 
-    cmake --install build # CMake 3.15+ only
-    ```
-5. Clean
+
+4. Test (Optional)
     ```bash
-    cmake --build build/ --target clean
+    ctest --preset <name>
     ```
+
+To list the available presets that can be used, run `--list-presets`.
+Some available options include `dev`, `debug`, `release`, `relwithdebinfo` etc.
 
 **Notes:**
 If you use `cmake --build` instead of directly calling the underlying build system you can use:
-- `-v` for verbose builds (CMake 3.14+)
 - `--parallel N` or `-j N` for parallel builds on *N* amount of cores (CMake 3.12+)
 - `--target` (Any CMake version) or `-t` (CMake 3.15+) to pick a target. E.g. `--target clean`
-
-Some common CMake options that may be useful:
-- `-DCMAKE_BUILD_TYPE=` with the following options which may include `None`, `Debug`, `Release`, `RelWithDebInfo` or something else not listed
-    - `-- /p:configuration=Release` For Visual Studio
-- `-DCMAKE_INSTALL_PREFIX ` to specify install location. Default is `/usr/local`
-- `-DBUILD_SHARED_LIBS=` wither either `ON` or `OFF` to control the default for shared libraries
+- `-v` for verbose builds (CMake 3.14+)
 
 If you use make directly instead,  you can use:
 - `VERBOSE=1 make` for verbose builds
 
 To use a compiler different to the system default:
-- In step one an example command would look like:
-   `cmake . -B build -D CMAKE_C_COMPILER=gcc-10.2 -D CMAKE_CXX_COMPILER=g++-10.2`
-- This is set in the first step since it effects everything else
-
+- In the configure step, append the following:
+   `-D CMAKE_C_COMPILER=gcc-10.2 -D CMAKE_CXX_COMPILER=g++-10.2`
 
 ## Thanks to the following projects
 Listed in no particular order
@@ -55,4 +47,4 @@ Listed in no particular order
 - [bibo5088/mangadex-downloader](https://github.com/bibo5088/mangadex-downloader/) Mangadex downloader, inspired the beginning of this project
 
 ## License
-This program is available to anybody free of charge, under the terms of MIT License (see [LICENSE](LICENSE)).
+This program is available to anybody free of charge, under the terms of `MIT` License (see [LICENSE](LICENSE)).

@@ -11,10 +11,15 @@ Checks:             "*,
                     -hicpp-braces-around-statements,
                     -hicpp-deprecated-headers,
                     -hicpp-no-malloc,
+                    -hicpp-signed-bitwise,
                     -hicpp-uppercase-literal-suffix,
                     -hicpp-use-auto,
                     -hicpp-use-emplace,
                     -hicpp-vararg,
+                    -llvmlibc-callee-namespace,
+                    -llvmlibc-implementation-in-namespace,
+                    -llvmlibc-restrict-system-libc-headers,
+                    -readability-function-cognitive-complexity,
                     -readability-magic-numbers"
 HeaderFilterRegex:  ''
 FormatStyle:        file

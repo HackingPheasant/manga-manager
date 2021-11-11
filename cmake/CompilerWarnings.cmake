@@ -1,6 +1,16 @@
 # Warning flags based from:
 # https://github.com/lefticus/cppbestpractices/blob/master/02-Use_the_Tools_Available.md
 
+# TODO
+# - https://github.com/HackingPheasant/manga-manager/issues/7
+# - change to something like -Weverything and explictily disable as needed, like I do in clang tidy
+# TODO for CMakeUserPresets.json
+# - have a everything preset that will build vsrious versions, such as address sanitizer version, 
+# undefined behaviour type version etc and run them
+# - setup valgrind
+# - setup Unit tests presets and related.
+# - setup to compile under mutliple compilers at once.
+
 # interface target for our warnings
 add_library(project_warnings INTERFACE)
 add_library(project::warnings ALIAS project_warnings)

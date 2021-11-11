@@ -2,7 +2,7 @@ if(TARGET imgui::imgui)
     return()
 endif()
 
-message(STATUS "Third-party (external): creating target 'imgui::imgui'")
+message(STATUS "Third-party (external) targets available: 'imgui::imgui'")
 
 include(FetchContent)
 FetchContent_Declare(
@@ -25,6 +25,7 @@ add_library(imgui "")
 add_library(imgui::imgui ALIAS imgui)
 target_include_directories(
     imgui
+    SYSTEM
     PUBLIC
         $<BUILD_INTERFACE:${imgui_SOURCE_DIR}>
         $<INSTALL_INTERFACE:include>
@@ -112,13 +113,13 @@ if(IMGUI_BUILD_OSX_BINDING)
 endif()
 
 if(IMGUI_BUILD_SDL2_BINDING)
-    find_package(SDL2 CONFIG REQUIRED)
+    #find_package(SDL2 CONFIG REQUIRED)
     target_link_libraries(imgui PUBLIC SDL2::SDL2)
     target_sources(imgui PRIVATE ${imgui_SOURCE_DIR}/backends/imgui_impl_sdl.cpp)
 endif()
 
 if(IMGUI_BUILD_VULKAN_BINDING)
-    find_package(Vulkan REQUIRED)
+    #find_package(Vulkan REQUIRED)
     target_link_libraries(imgui PUBLIC Vulkan::Vulkan)
     target_sources(imgui PRIVATE ${imgui_SOURCE_DIR}/backends/imgui_impl_vulkan.cpp)
 endif()

@@ -2,7 +2,7 @@ if(TARGET fmt::fmt)
     return()
 endif()
 
-message(STATUS "Third-party (external): creating target 'fmt::fmt'")
+message(STATUS "Third-party (external) targets available: 'fmt::fmt'")
 
 include(FetchContent)
 FetchContent_Declare(

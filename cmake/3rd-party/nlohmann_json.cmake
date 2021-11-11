@@ -2,7 +2,7 @@ if(TARGET nlohmann_json::nlohmann_json)
     return()
 endif()
 
-message(STATUS "Third-party (external): creating target 'nlohmann_json::nlohmann_json'")
+message(STATUS "Third-party (external) targets available: 'nlohmann_json::nlohmann_json'")
 
 # Note: Using alternative url as suggested by:
 # https://github.com/nlohmann/json#embedded-fetchcontent

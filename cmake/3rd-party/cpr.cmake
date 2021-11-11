@@ -15,7 +15,7 @@ if (NOT DEFINED CPR_FORCE_USE_SYSTEM_CURL)
     set(CPR_FORCE_USE_SYSTEM_CURL ON)
 endif()
 
-message(STATUS "Third-party (external): creating target 'cpr::cpr'")
+message(STATUS "Third-party (external) targets available: 'cpr::cpr'")
 
 include(FetchContent)
 FetchContent_Declare(

@@ -1,3 +1,3 @@
 add_subdirectory(core)
 add_subdirectory(providers)
-#add_subdirectory(ui)
+add_subdirectory(ui)

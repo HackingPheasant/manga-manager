@@ -12,11 +12,15 @@ FetchContent_Declare(
     nlohmann_json
     # GIT_REPOSITORY https://github.com/nlohmann/json.git
     GIT_REPOSITORY https://github.com/ArthurSonzogni/nlohmann_json_cmake_fetchcontent.git
-    GIT_TAG v3.9.1
+    GIT_TAG v3.10.4
     )
 
 FetchContent_MakeAvailable(nlohmann_json)
 
-if (NOT DEFINED JSON_BuildTests)
-    set(JSON_BuildTests OFF)
+if (NOT DEFINED JSON_SystemInclude)
+    set(JSON_SystemInclude ON)
+endif()
+
+if (NOT DEFINED JSON_Diagnostics)
+    set(JSON_Diagnostics ON)
 endif()

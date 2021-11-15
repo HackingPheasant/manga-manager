@@ -1,77 +1,63 @@
-# Warning flags based from:
-# https://github.com/lefticus/cppbestpractices/blob/master/02-Use_the_Tools_Available.md
-
-# TODO
-# - https://github.com/HackingPheasant/manga-manager/issues/7
-# - change to something like -Weverything and explictily disable as needed, like I do in clang tidy
-# TODO for CMakeUserPresets.json
-# - have a everything preset that will build vsrious versions, such as address sanitizer version, 
-# undefined behaviour type version etc and run them
-# - setup valgrind
-# - setup Unit tests presets and related.
-# - setup to compile under mutliple compilers at once.
-
 # interface target for our warnings
-add_library(project_warnings INTERFACE)
-add_library(project::warnings ALIAS project_warnings)
+add_library(project_options INTERFACE)
+add_library(project::options ALIAS project_options)
+
+# Set C++ Standard
+target_compile_features(project_options INTERFACE cxx_std_20)
 
 # installation
-set_target_properties(project_warnings PROPERTIES EXPORT_NAME warnings)
-install(TARGETS project_warnings EXPORT project_targets)
+set_target_properties(project_options PROPERTIES EXPORT_NAME compiler_options)
+install(TARGETS project_options EXPORT project_targets)
 
-# compiler options
+# Compiler specific options
+#
 # More compiler targets can be found at:
 # https://cmake.org/cmake/help/latest/variable/CMAKE_LANG_COMPILER_ID.html
-if(ENABLE_WARNINGS)
+if("${CMAKE_CXX_COMPILER_ID}" MATCHES ".*Clang")
+    # Clang options that cover both Clang and Apple Clang
+    if(ENABLE_WARNINGS)
+        target_compile_options(project_options INTERFACE
+            "-Wall"
+            "-Wextra"               # reasonable and standard
+            "-Wshadow"              # warn the user if a variable declaration shadows one from a parent context
+            "-Wnon-virtual-dtor"    # warn the user if a class with virtual functions has a non-virtual destructor.
+                                    # This helps catch hard to track down memory errors
+            "-Wold-style-cast"      # warn for c-style casts
+            "-Wcast-align"          # warn for potential performance problem casts
+            "-Wunused"              # warn on anything being unused
+            "-Woverloaded-virtual"  # warn if you overload (not override) a virtual function
+            "-Wpedantic"            # warn if non-standard C++ is used
+            "-Wconversion"          # warn on type conversions that may lose data
+            "-Wsign-conversion"     # warn on sign conversions
+            "-Wnull-dereference"    # warn if a null dereference is detected
+            "-Wdouble-promotion"    # warn if float is implicit promoted to double
+            "-Wformat=2"            # warn on security issues around functions that format output (ie printf)
+            "-Wimplicit-fallthrough"# warn on statements that fallthrough without an explicit annotation
+            )
+
+        if(ENABLE_WARNINGS_AS_ERRORS)
+            target_compile_options(project_options INTERFACE "-Werror")
+        endif()
+    endif()
+
+    option(ENABLE_BUILD_WITH_TIME_TRACE "Enable -ftime-trace to generate time tracing .json files on clang" OFF)
+    if(ENABLE_BUILD_WITH_TIME_TRACE)
+        target_compile_options(project_options INTERFACE -ftime-trace)
+    endif()
+
+
     if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
-        target_compile_options(project_warnings INTERFACE
-            "-Wall"
-            "-Wextra"               # reasonable and standard
-            "-Wshadow"              # warn the user if a variable declaration shadows one from a parent context
-            "-Wnon-virtual-dtor"    # warn the user if a class with virtual functions has a non-virtual destructor.
-                                    # This helps catch hard to track down memory errors
-            "-Wold-style-cast"      # warn for c-style casts
-            "-Wcast-align"          # warn for potential performance problem casts
-            "-Wunused"              # warn on anything being unused
-            "-Woverloaded-virtual"  # warn if you overload (not override) a virtual function
-            "-Wpedantic"            # warn if non-standard C++ is used
-            "-Wconversion"          # warn on type conversions that may lose data
-            "-Wsign-conversion"     # warn on sign conversions
-            "-Wnull-dereference"    # warn if a null dereference is detected
-            "-Wdouble-promotion"    # warn if float is implicit promoted to double
-            "-Wformat=2"            # warn on security issues around functions that format output (ie printf)
-            )
-
-        if(ENABLE_WARNINGS_AS_ERRORS)
-            target_compile_options(project_warnings INTERFACE "-Werror")
-        endif()
+        # Apple Clang specific flags 
     elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-        target_compile_options(project_warnings INTERFACE
+        # Clang options that Apple Clang can't handle
+    endif()
+elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    if(ENABLE_WARNINGS)
+        target_compile_options(project_options INTERFACE
             "-Wall"
             "-Wextra"               # reasonable and standard
             "-Wshadow"              # warn the user if a variable declaration shadows one from a parent context
-            "-Wnon-virtual-dtor"    # warn the user if a class with virtual functions has a non-virtual destructor.
-                                    # This helps catch hard to track down memory errors
-            "-Wold-style-cast"      # warn for c-style casts
-            "-Wcast-align"          # warn for potential performance problem casts
-            "-Wunused"              # warn on anything being unused
-            "-Woverloaded-virtual"  # warn if you overload (not override) a virtual function
-            "-Wpedantic"            # warn if non-standard C++ is used
-            "-Wconversion"          # warn on type conversions that may lose data
-            "-Wsign-conversion"     # warn on sign conversions
-            "-Wnull-dereference"    # warn if a null dereference is detected
-            "-Wdouble-promotion"    # warn if float is implicit promoted to double
-            "-Wformat=2"            # warn on security issues around functions that format output (ie printf)
-            )
-
-        if(ENABLE_WARNINGS_AS_ERRORS)
-            target_compile_options(project_warnings INTERFACE "-Werror")
-        endif()
-    elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-        target_compile_options(project_warnings INTERFACE
-            "-Wall"
-            "-Wextra"               # reasonable and standard
-            "-Wshadow"              # warn the user if a variable declaration shadows one from a parent context
+            "-Wpedantic"
             "-Wnon-virtual-dtor"    # warn the user if a class with virtual functions has a non-virtual destructor.
                                     # This helps catch hard to track down memory errors
             "-Wold-style-cast"      # warn for c-style casts
@@ -92,10 +78,15 @@ if(ENABLE_WARNINGS)
             )
 
         if(ENABLE_WARNINGS_AS_ERRORS)
-            target_compile_options(project_warnings INTERFACE "-Werror")
+            target_compile_options(project_options INTERFACE "-Werror")
         endif()
-    elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-        target_compile_options(project_warnings INTERFACE
+    endif()
+elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+    target_compile_options(project_options INTERFACE
+        "/permissive-" # standards conformance mode for MSVC compiler.
+        )
+    if(ENABLE_WARNINGS)
+        target_compile_options(project_options INTERFACE
             "/W4"       # Baseline reasonable warnings
             "/w14242"   # 'identifier': conversion from 'type1' to 'type1', possible loss of data
             "/w14254"   # 'operator': conversion from 'type1:field_bits' to 'type2:field_bits', possible loss of data
@@ -118,14 +109,20 @@ if(ENABLE_WARNINGS)
             "/w14905"   # wide string literal cast to 'LPSTR'
             "/w14906"   # string literal cast to 'LPWSTR'
             "/w14928"   # illegal copy-initialization; more than one user-defined conversion has been implicitly applied
-            "/permissive-" # standards conformance mode for MSVC compiler.
-            "NOMINMAX"  # Stop windows.h min/max macros conflicting with C++ Standard Library
             )
 
         if(ENABLE_WARNINGS_AS_ERRORS)
-            target_compile_options(project_warnings INTERFACE "/WX")
+            target_compile_options(project_options INTERFACE "/WX")
         endif()
-    else()
-        message(AUTHOR_WARNING "No compiler warnings set for '${CMAKE_CXX_COMPILER_ID}' compiler.")
     endif()
+else()
+    message(AUTHOR_WARNING "No compiler options/warnings set for '${CMAKE_CXX_COMPILER_ID}' compiler.")
+endif()
+
+
+# Operating Specific options
+if(WIN32)
+    target_compile_definitions(project_options INTERFACE
+        "NOMINMAX"  # Stop windows.h min/max macros conflicting with C++ Standard Library
+        )
 endif()

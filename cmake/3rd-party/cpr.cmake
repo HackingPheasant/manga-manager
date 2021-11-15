@@ -21,7 +21,7 @@ include(FetchContent)
 FetchContent_Declare(
     cpr
     GIT_REPOSITORY https://github.com/whoshuu/cpr.git
-    GIT_TAG 1.6.0
+    GIT_TAG 1.6.2
     )
 
 FetchContent_MakeAvailable(cpr)

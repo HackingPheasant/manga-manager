@@ -1,3 +1,6 @@
+add_library("manga-manager_ui")
+add_library("manga-manager::ui" ALIAS "manga-manager_ui")
+
 message(STATUS "manga-manager: creating target 'manga-manager::ui'")
 
 include(glm)
@@ -17,21 +20,32 @@ add_custom_command(COMMENT "Compiling Vulkan.hpp tutorial example fragment shade
     MAIN_DEPENDENCY ${CMAKE_CURRENT_SOURCE_DIR}/assets/vulkantut.frag
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/assets/vulkantut.frag ${GLSLANG_VALIDATOR})
 
-add_executable("ui-test" 
-    src/main.cpp
-    vulkantut.vert.inc
-    vulkantut.frag.inc
+target_sources("manga-manager_ui"
+    PRIVATE
+    window.cpp
+    PUBLIC
+    window.h
+    ${CMAKE_CURRENT_BINARY_DIR}/vulkantut.vert.inc
+    ${CMAKE_CURRENT_BINARY_DIR}/vulkantut.frag.inc
     )
 
-target_link_libraries("ui-test" PUBLIC
+target_link_libraries("manga-manager_ui" PUBLIC
     project::options
-    project::warnings
     Vulkan::Vulkan
     SDL2::SDL2
     glm::glm
     )
 
-target_include_directories("ui-test"
-    INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
-    PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
+target_include_directories("manga-manager_ui" PUBLIC
+    ${CMAKE_CURRENT_LIST_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR} # This line is so we can find our compiled shaders
     )
+
+if(BUILD_EXAMPLES)
+    add_subdirectory(examples)
+endif()
+
+#target_include_directories("ui-test"
+#    INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
+#    PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
+#    )

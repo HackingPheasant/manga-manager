@@ -86,6 +86,8 @@
 #include <iostream>
 #include <limits>
 #include <set>
+#include <string>
+#include <string_view>
 #include <thread>
 #include <tuple>
 #include <vector>
@@ -96,6 +98,9 @@
 
 #define GLM_FORCE_RADIANS
 #include <glm/gtc/matrix_transform.hpp>
+
+class Render {
+};
 
 // TODO Make vk::DebugReportCallbackCreateInfoEXT
 // https://github.com/KhronosGroup/Vulkan-Hpp/blob/master/samples/CreateDebugUtilsMessenger/CreateDebugUtilsMessenger.cpp
@@ -127,7 +132,7 @@ auto findMemoryType(vk::PhysicalDeviceMemoryProperties const &memoryProperties,
 // 6. Cleanup after ourselves
 auto main() -> int try {
     //TODO: Comment this code better 👀
-    // Till then, this site gives a decent rundown of 
+    // Till then, this site gives a decent rundown of
     // what each section of code does
     // https://alaingalvan.medium.com/raw-vulkan-b60d3d946b9c
     const std::string AppName = "Manga Manager";

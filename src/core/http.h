@@ -8,6 +8,7 @@ namespace http {
 // what the function needs at minimum: url
 //  url, cookies (tbd)
 auto get(std::string) -> cpr::Response;
+auto post(std::string) -> cpr::Response;
 
 } // namespace http
 

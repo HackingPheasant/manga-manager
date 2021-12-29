@@ -2,20 +2,30 @@
 #include <string>
 #include <string_view>
 
-namespace window {
-class Window {
+#include "vulkan_defines.h"
+
+#define SDL_MAIN_HANDLED
+#include <SDL.h>
+#include <SDL_vulkan.h>
+
+// I wanted to name my class Window but I keep confliciting with X11 c code
+// It was just easier to give in and rename the class then any other option
+class AppWindow {
   public:
     struct Extent {
-        std::uint32_t width;
-        std::uint32_t height;
-    };
+        int width;
+        int height;
 
-    struct Properties {
-        std::string title;
-        Extent extent = {1280, 720};
-    };
+        Extent(int initial_width, int initial_height) : width(initial_width),
+                                                        height(initial_height) {}
+    } extent;
 
-    Window(std::string_view title);
-    ~Window();
+    const std::string title;
+
+    SDL_Window *window;
+
+    AppWindow(std::string_view, int, int);
+    ~AppWindow();
+    auto createSurface(vk::Instance &) const -> vk::SurfaceKHR;
+    void getWindowSize();
 };
-} // namespace window

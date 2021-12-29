@@ -1,82 +1,3 @@
-// Enable C++ Designated Initializers in Vulkan.hpp
-// https://github.com/KhronosGroup/Vulkan-Hpp#designated-initializers
-#define VULKAN_HPP_NO_STRUCT_CONSTRUCTORS
-// With this pull request:
-// https://github.com/KhronosGroup/Vulkan-Hpp/pull/1010
-// On merge commit (2021-07-06):
-// https://github.com/KhronosGroup/Vulkan-Hpp/commit/793f70dbad6b0bf16d071d016e39a988420756d1
-// The configuration option has changed. For now we will keep both defines
-// since this hasn't propagated out to distro releases yet.
-#define VULKAN_HPP_NO_CONSTRUCTORS
-// Disable setter member functions (Also introduced in above merge, 793f70db)
-#define VULKAN_HPP_NO_SETTERS
-
-// Vulkan System Defines
-// It took me too long to figure out where everyone got the correct
-// VK_USE_PLATFORM_* define guards. Until I stumbled across
-// https://github.com/KhronosGroup/Vulkan-Loader/blob/99c0b1433a0965ba7cd0dbef0e19fce649ddc12e/loader/CMakeLists.txt#L31
-// Which made me realise it was defined by the build system and not in one of
-// the many vulkan header files I looked through.
-// For now I'll try defining the defines here, but if it proves to be
-// to brittle I will move it into the build system (move it to
-// CMakeLists.txt)
-// This may not cover every system it can be used on, but it covers every
-// system I run on/want to run on.
-// https://www.khronos.org/registry/vulkan/specs/1.2-extensions/html/chap51.html#boilerplate-wsi-header
-// Above link is also used as refernce on creating the below defines
-
-// Android
-#if defined(__ANDROID__)
-#define VK_USE_PLATFORM_ANDROID_KHR
-#endif
-
-// Fuchsia
-#if defined(__Fuchsia__)
-#define VK_USE_PLATFORM_FUCHSIA
-#endif
-
-// Apple
-#if defined(__APPLE__)
-#define VK_USE_PLATFORM_METAL_EXT
-#include <TargetConditionals.h>
-#if TARGET_OS_IPHONE
-#define VK_USE_PLATFORM_IOS_MVK
-#elif TARGET_OS_MAC
-#define VK_USE_PLATFORM_MACOS_MVK
-#endif
-#endif
-
-// Windows
-#if defined(_WIN32) || defined(_WIN64) || defined(__NT__)
-#define VK_USE_PLATFORM_WIN32_KHR
-#endif
-
-// Linux and *nix
-#if defined(__linux__) || defined(__unix__)
-#if __has_include(<wayland-client.h>)
-#define VK_USE_PLATFORM_WAYLAND_KHR
-#endif
-#if __has_include(<X11/Xlib.h>)
-#define VK_USE_PLATFORM_XLIB_KHR
-#endif
-#ifdef VK_USE_PLATFORM_XLIB_KHR
-#if __has_include(<X11/extensions/Xrandr.h>)
-#define VK_USE_PLATFORM_XLIB_XRANDR_EXT
-#endif
-#endif
-#if __has_include(<xcb/xcb.h>)
-#define VK_USE_PLATFORM_XCB_KHR
-#endif
-#if __has_include(<directfb/directfb.h>)
-#define VK_USE_PLATFORM_DIRECTFB_EXT
-#endif
-#endif
-
-// Enable Vulkan debug utilities if we compile as Debug
-#ifndef NDEBUG
-#define VULKAN_DEBUG
-#endif
-
 #include <algorithm>
 #include <array>
 #include <cassert>
@@ -92,15 +13,11 @@
 #include <tuple>
 #include <vector>
 
-#include <SDL.h>
-#include <SDL_vulkan.h>
-#include <vulkan/vulkan.hpp>
+#include "vulkan_defines.h"
+#include "window.h"
 
 #define GLM_FORCE_RADIANS
 #include <glm/gtc/matrix_transform.hpp>
-
-class Render {
-};
 
 // TODO Make vk::DebugReportCallbackCreateInfoEXT
 // https://github.com/KhronosGroup/Vulkan-Hpp/blob/master/samples/CreateDebugUtilsMessenger/CreateDebugUtilsMessenger.cpp
@@ -131,14 +48,12 @@ auto findMemoryType(vk::PhysicalDeviceMemoryProperties const &memoryProperties,
 // 5. Render
 // 6. Cleanup after ourselves
 auto main() -> int try {
-    //TODO: Comment this code better 👀
+    // TODO: Comment this code better 👀
     // Till then, this site gives a decent rundown of
     // what each section of code does
     // https://alaingalvan.medium.com/raw-vulkan-b60d3d946b9c
     const std::string AppName = "Manga Manager";
     const std::string EngineName = "Vulkan.hpp";
-    int width = 1280;
-    int height = 720;
 
     // Shader and Frag code for the renderer
     // Look away, I am commiting c++ crimes
@@ -207,24 +122,25 @@ auto main() -> int try {
     };
     // END Vulkan-HPP Samples stuff
 
-    // Initialize SDL2
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_TIMER) != 0) {
-        throw std::runtime_error("Unable to initialize SDL: " + std::string(SDL_GetError()));
-    }
-
-    // Create an application window with the following settings:
-    SDL_Window *window = SDL_CreateWindow(
-        AppName.c_str(),                                                      // window title
-        SDL_WINDOWPOS_CENTERED,                                               // initial x position
-        SDL_WINDOWPOS_CENTERED,                                               // initial y position
-        width,                                                                // width, in pixels
-        height,                                                               // height, in pixels
-        SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI); // flags
-
-    // Check that the window was successfully created
-    if (window == nullptr) {
-        throw std::runtime_error("Could not create window: " + std::string(SDL_GetError()));
-    }
+    // Create the window
+    // This is where we will later render our content to
+    //
+    // This is kept at the top of the source file to allow x11 (and possibly
+    // applicable to wayland) enough time to create and present the window as
+    // well as allowing SDL to grab the current and correct values for the
+    // window extent (width/height) instead of the just defaulting to the
+    // initial window creation values we provided below
+    // This allows us to have a correctly sized swapchain and avoid visual
+    // issues like below
+    //
+    // https://twitter.com/HackingPheasant/status/1475730781750247425
+    // https://web.archive.org/web/20211229060434/https://twitter.com/HackingPheasant/status/1475730781750247425
+    //
+    // The other potential option other then doing this was sleeping for a 1
+    // second or less which seemed to also allow x11 to do its thing in time
+    // But this seemed the lesser of two evils with less potential for going
+    // wrong.
+    AppWindow window(AppName, 1280, 720);
 
     // Now the large majority of this file will be setting up the necessary boilerplate
     // for the Vulkan render
@@ -344,14 +260,7 @@ auto main() -> int try {
             .ppEnabledExtensionNames = instanceExtensions.data()});
 
     // Create abstract surface to render to.
-    vk::SurfaceKHR surface;
-    {
-        VkSurfaceKHR _surface = nullptr;
-        if (SDL_Vulkan_CreateSurface(window, static_cast<VkInstance>(instance), &_surface) == 0) {
-            throw std::runtime_error("Could not create a Vulkan surface: " + std::string(SDL_GetError()));
-        }
-        surface = vk::SurfaceKHR(_surface);
-    }
+    vk::SurfaceKHR surface = window.createSurface(instance);
 
     // Enumerate the physicalDevices
     // TODO: Handle more then just the first device we decided to grab,
@@ -491,21 +400,20 @@ auto main() -> int try {
     vk::Format colorFormat =
         (formats[0].format == vk::Format::eUndefined) ? vk::Format::eB8G8R8A8Unorm : formats[0].format;
 
-    // Get the size of the windows underlying drawable dimension
-    // May differ to SDL_GetWindowSize() if rendering to a high-DPI
-    // drawable. e,g, Apples "Retina" screen
-    SDL_Vulkan_GetDrawableSize(window, &width, &height);
-
     vk::SurfaceCapabilitiesKHR surfaceCapabilities = physicalDevice.getSurfaceCapabilitiesKHR(surface);
 
     vk::Extent2D extent;
 
     if (surfaceCapabilities.currentExtent.width == std::numeric_limits<std::uint32_t>::max()) {
+        // Get most recent window size before we go using it in our vulkan code
+        // Updates the values in window.extent.{width/height}
+        window.getWindowSize();
+
         // If the surface size is undefined, the size is set to the size of the images requested.
         extent.width =
-            std::clamp(static_cast<std::uint32_t>(width), surfaceCapabilities.minImageExtent.width, surfaceCapabilities.maxImageExtent.width);
+            std::clamp(static_cast<std::uint32_t>(window.extent.width), surfaceCapabilities.minImageExtent.width, surfaceCapabilities.maxImageExtent.width);
         extent.height =
-            std::clamp(static_cast<std::uint32_t>(height), surfaceCapabilities.minImageExtent.height, surfaceCapabilities.maxImageExtent.height);
+            std::clamp(static_cast<std::uint32_t>(window.extent.height), surfaceCapabilities.minImageExtent.height, surfaceCapabilities.maxImageExtent.height);
     } else {
         // If the surface size is defined, the swap chain size must match
         extent = surfaceCapabilities.currentExtent;
@@ -840,6 +748,7 @@ auto main() -> int try {
     // https://github.com/KhronosGroup/Vulkan-Hpp/issues/857#issuecomment-762706418
     // My twitter rant about it can be found here
     // https://twitter.com/HackingPheasant/status/1447811202839547904
+    // https://web.archive.org/web/20211012062754/https://twitter.com/HackingPheasant/status/1447811202839547904
     vk::ShaderModule vertexShaderModule = device.createShaderModule(
         vk::ShaderModuleCreateInfo{
             .flags = vk::ShaderModuleCreateFlags(),
@@ -1207,13 +1116,9 @@ auto main() -> int try {
     device.destroy();
     instance.destroySurfaceKHR(surface);
 #if defined(VULKAN_DEBUG)
-    //instance.destroyDebugUtilsMessengerEXT(debugUtilsMessenger);
+    // instance.destroyDebugUtilsMessengerEXT(debugUtilsMessenger);
 #endif
     instance.destroy();
-
-    // Clean up the SDL2 mess
-    SDL_DestroyWindow(window);
-    SDL_Quit();
 
     return 0;
 } catch (vk::SystemError &err) {

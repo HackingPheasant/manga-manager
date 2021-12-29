@@ -25,6 +25,7 @@ target_sources("manga-manager_ui"
     window.cpp
     PUBLIC
     window.h
+    vulkan_defines.h
     ${CMAKE_CURRENT_BINARY_DIR}/vulkantut.vert.inc
     ${CMAKE_CURRENT_BINARY_DIR}/vulkantut.frag.inc
     )

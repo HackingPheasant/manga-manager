@@ -3,7 +3,7 @@ add_library(project_options INTERFACE)
 add_library(project::options ALIAS project_options)
 
 # Set C++ Standard
-target_compile_features(project_options INTERFACE cxx_std_20)
+target_compile_features(project_options INTERFACE cxx_std_23)
 
 # installation
 set_target_properties(project_options PROPERTIES EXPORT_NAME compiler_options)

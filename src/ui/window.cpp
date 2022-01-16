@@ -28,7 +28,7 @@ AppWindow::~AppWindow() {
     SDL_Quit();
 }
 
-auto AppWindow::createSurface(vk::Instance &instance) const -> vk::SurfaceKHR {
+auto AppWindow::createSurface(const vk::Instance &instance) const -> vk::SurfaceKHR {
     // We need to pass the C version of the object to the 3rd-party library
     VkSurfaceKHR _surface = nullptr;
     if (SDL_Vulkan_CreateSurface(window, static_cast<VkInstance>(instance), &_surface) == 0) {

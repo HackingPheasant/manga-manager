@@ -47,6 +47,16 @@ auto findMemoryType(vk::PhysicalDeviceMemoryProperties const &memoryProperties,
 // 4. Setup Commands for each command buffer to set the GPU state to render what we want.
 // 5. Render
 // 6. Cleanup after ourselves
+//
+// Note: You'll see alot of const on vulkan.hpp objects, but since it's a C++
+// wrapper around C code the vulkan.hpp objects are const but the stuff they
+// wrap are still mutuble, this is known as shallow const (Deep const is where
+// an object and any children/objects it contains are immutable).
+// For some developers they may wonder why even mark it as const, in this case
+// its more like a contract between me (developer) and the code where I
+// "promise" that I wont be modifying the vulkan.hpp object *myself* after
+// creation. But I am fully aware that the library I am interacting with itself
+// may modify the content contained inside.
 auto main() -> int try {
     // TODO: Comment this code better 👀
     // Till then, this site gives a decent rundown of
@@ -57,11 +67,11 @@ auto main() -> int try {
 
     // Shader and Frag code for the renderer
     // Look away, I am commiting c++ crimes
-    constexpr auto vertShader = std::to_array<std::uint32_t>({
+    auto constexpr vertShader = std::to_array<std::uint32_t>({
 #include "vulkantut.vert.inc"
     });
 
-    constexpr auto fragShader = std::to_array<std::uint32_t>({
+    auto constexpr fragShader = std::to_array<std::uint32_t>({
 #include "vulkantut.frag.inc"
     });
     // It's safe to look again.
@@ -157,12 +167,12 @@ auto main() -> int try {
         .apiVersion = VK_MAKE_API_VERSION(0, 1, 2, 0)}; // (variant, major, minor, patch)
 
     // Enumerate the Instance Layers
-    std::vector<vk::LayerProperties> instanceLayerProperties = vk::enumerateInstanceLayerProperties();
+    const std::vector<vk::LayerProperties> instanceLayerProperties = vk::enumerateInstanceLayerProperties();
 
     // Check and enable (if found) required Layers
     std::vector<char const *> instanceLayers;
 
-    std::set<std::string> desiredInstanceLayers {
+    const std::set<std::string> desiredInstanceLayers {
 #if defined(VULKAN_DEBUG)
         // https://vulkan.lunarg.com/doc/view/latest/linux/khronos_validation_layer.html
         "VK_LAYER_KHRONOS_validation"
@@ -178,14 +188,14 @@ auto main() -> int try {
     }
 
     // Enumerate the Instance Extensions
-    std::vector<vk::ExtensionProperties> instanceExtensionProperties = vk::enumerateInstanceExtensionProperties();
+    const std::vector<vk::ExtensionProperties> instanceExtensionProperties = vk::enumerateInstanceExtensionProperties();
 
     // Check and enable (if found) required Extensions
     std::vector<char const *> instanceExtensions;
 
     // NOTE: Not all platform includes below will be made use of yet or at all in this code
     //  but listing them here for future experiments/use
-    std::set<std::string> desiredInstanceExtensions {
+    const std::set<std::string> desiredInstanceExtensions {
         // clang-format off
 #if defined(VULKAN_DEBUG)
         // https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/VK_EXT_debug_utils.html
@@ -250,7 +260,7 @@ auto main() -> int try {
     }
 
     // Create an Instance
-    vk::Instance instance = vk::createInstance(
+    const vk::Instance instance = vk::createInstance(
         vk::InstanceCreateInfo{
             .flags = vk::InstanceCreateFlags(),
             .pApplicationInfo = &applicationInfo,
@@ -260,7 +270,7 @@ auto main() -> int try {
             .ppEnabledExtensionNames = instanceExtensions.data()});
 
     // Create abstract surface to render to.
-    vk::SurfaceKHR surface = window.createSurface(instance);
+    const vk::SurfaceKHR surface = window.createSurface(instance);
 
     // Enumerate the physicalDevices
     // TODO: Handle more then just the first device we decided to grab,
@@ -270,16 +280,16 @@ auto main() -> int try {
     // Example of how to do it:
     // https://github.com/KhronosGroup/Vulkan-Hpp/blob/master/samples/16_Vulkan_1_1/16_Vulkan_1_1.cpp
     // But for now we will just grab the first device
-    vk::PhysicalDevice physicalDevice = instance.enumeratePhysicalDevices().front();
+    const vk::PhysicalDevice physicalDevice = instance.enumeratePhysicalDevices().front();
 
     // Queue Family
-    std::vector<vk::QueueFamilyProperties> queueFamilyProperties = physicalDevice.getQueueFamilyProperties();
+    const std::vector<vk::QueueFamilyProperties> queueFamilyProperties = physicalDevice.getQueueFamilyProperties();
     // No Lint comment is used till the below patch is merged into clang tidy
     // https://reviews.llvm.org/D88833
     assert(queueFamilyProperties.size() < std::numeric_limits<std::uint32_t>::max()); // NOLINT(cppcoreguidelines-pro-bounds-array-to-pointer-decay,hicpp-no-array-decay)
 
     // Get the first index into queueFamilyProperties which supports graphics
-    auto graphicsQueueFamilyProperty = std::find_if(
+    auto const graphicsQueueFamilyProperty = std::find_if(
         queueFamilyProperties.begin(),
         queueFamilyProperties.end(),
         [](vk::QueueFamilyProperties const &qfp) {
@@ -328,12 +338,12 @@ auto main() -> int try {
     }
 
     // Enumerate the Device Extensions
-    std::vector<vk::ExtensionProperties> physicalDeviceExtensionProperties = physicalDevice.enumerateDeviceExtensionProperties();
+    const std::vector<vk::ExtensionProperties> physicalDeviceExtensionProperties = physicalDevice.enumerateDeviceExtensionProperties();
 
     // Check and enable (if found) required Extensions
     std::vector<char const *> physicalDeviceExtensions;
 
-    std::set<std::string> desiredPhysicalDeviceExtensions{
+    const std::set<std::string> desiredPhysicalDeviceExtensions{
         "VK_KHR_swapchain"};
 
     physicalDeviceExtensions.reserve(desiredPhysicalDeviceExtensions.size());
@@ -345,15 +355,15 @@ auto main() -> int try {
     }
 
     // Create a Device
-    float queuePriority = 0.0F;
+    const float queuePriority = 0.0F;
 
-    auto deviceQueueCreateInfo = vk::DeviceQueueCreateInfo{
+    auto const deviceQueueCreateInfo = vk::DeviceQueueCreateInfo{
         .flags = vk::DeviceQueueCreateFlags(),
         .queueFamilyIndex = static_cast<std::uint32_t>(graphicsQueueFamilyIndex),
         .queueCount = 1,
         .pQueuePriorities = &queuePriority};
 
-    vk::PhysicalDeviceFeatures physicalDeviceFeatures;
+    const vk::PhysicalDeviceFeatures physicalDeviceFeatures;
 
     // Note for vk:DeviceCreateInfo:
     // Even though Device Layers have been deprecated, it is still
@@ -363,7 +373,7 @@ auto main() -> int try {
     // I'll be following the latter suggestion and just pass the
     // instanceLayers vector.
     // https://www.khronos.org/registry/vulkan/specs/1.1-extensions/html/vkspec.html#extendingvulkan-layers-devicelayerdeprecation
-    vk::Device device = physicalDevice.createDevice(
+    const vk::Device device = physicalDevice.createDevice(
         vk::DeviceCreateInfo{
             .flags = vk::DeviceCreateFlags(),
             .queueCreateInfoCount = 1,
@@ -375,32 +385,32 @@ auto main() -> int try {
             .pEnabledFeatures = &physicalDeviceFeatures});
 
     // Create a CommandPool to allocate a CommandBuffer from
-    vk::CommandPool commandPool = device.createCommandPool(
+    const vk::CommandPool commandPool = device.createCommandPool(
         vk::CommandPoolCreateInfo{
             .flags = vk::CommandPoolCreateFlags(),
             .queueFamilyIndex = static_cast<std::uint32_t>(graphicsQueueFamilyIndex)});
 
     // Allocate a CommandBuffer from the CommandPool
-    auto commandBufferAllocateInfo = vk::CommandBufferAllocateInfo{
+    auto const commandBufferAllocateInfo = vk::CommandBufferAllocateInfo{
         .commandPool = commandPool,
         .level = vk::CommandBufferLevel::ePrimary,
         .commandBufferCount = 1};
 
-    vk::CommandBuffer commandBuffer =
+    const vk::CommandBuffer commandBuffer =
         device.allocateCommandBuffers(commandBufferAllocateInfo).front();
 
     // Create the queues for later use
-    vk::Queue graphicsQueue = device.getQueue(static_cast<std::uint32_t>(graphicsQueueFamilyIndex), 0);
-    vk::Queue presentQueue = device.getQueue(static_cast<std::uint32_t>(presentQueueFamilyIndex), 0);
+    const vk::Queue graphicsQueue = device.getQueue(static_cast<std::uint32_t>(graphicsQueueFamilyIndex), 0);
+    const vk::Queue presentQueue = device.getQueue(static_cast<std::uint32_t>(presentQueueFamilyIndex), 0);
 
     // Get the supported VkFormats
-    std::vector<vk::SurfaceFormatKHR> formats = physicalDevice.getSurfaceFormatsKHR(surface);
+    const std::vector<vk::SurfaceFormatKHR> formats = physicalDevice.getSurfaceFormatsKHR(surface);
     assert(!formats.empty()); // NOLINT(cppcoreguidelines-pro-bounds-array-to-pointer-decay,hicpp-no-array-decay)
 
-    vk::Format colorFormat =
+    const vk::Format colorFormat =
         (formats[0].format == vk::Format::eUndefined) ? vk::Format::eB8G8R8A8Unorm : formats[0].format;
 
-    vk::SurfaceCapabilitiesKHR surfaceCapabilities = physicalDevice.getSurfaceCapabilitiesKHR(surface);
+    const vk::SurfaceCapabilitiesKHR surfaceCapabilities = physicalDevice.getSurfaceCapabilitiesKHR(surface);
 
     vk::Extent2D extent;
 
@@ -420,14 +430,14 @@ auto main() -> int try {
     }
 
     // The FIFO present mode is guaranteed by the spec to be supported
-    vk::PresentModeKHR swapchainPresentMode = vk::PresentModeKHR::eFifo;
+    const vk::PresentModeKHR swapchainPresentMode = vk::PresentModeKHR::eFifo;
 
-    vk::SurfaceTransformFlagBitsKHR preTransform =
+    const vk::SurfaceTransformFlagBitsKHR preTransform =
         (surfaceCapabilities.supportedTransforms & vk::SurfaceTransformFlagBitsKHR::eIdentity)
             ? vk::SurfaceTransformFlagBitsKHR::eIdentity
             : surfaceCapabilities.currentTransform;
 
-    vk::CompositeAlphaFlagBitsKHR compositeAlpha =
+    const vk::CompositeAlphaFlagBitsKHR compositeAlpha =
         (surfaceCapabilities.supportedCompositeAlpha & vk::CompositeAlphaFlagBitsKHR::ePreMultiplied)
             ? vk::CompositeAlphaFlagBitsKHR::ePreMultiplied
         : (surfaceCapabilities.supportedCompositeAlpha & vk::CompositeAlphaFlagBitsKHR::ePostMultiplied)
@@ -436,7 +446,7 @@ auto main() -> int try {
             ? vk::CompositeAlphaFlagBitsKHR::eInherit
             : vk::CompositeAlphaFlagBitsKHR::eOpaque;
 
-    std::array<std::uint32_t, 2> queueFamilyIndices = {
+    const std::array<std::uint32_t, 2> queueFamilyIndices = {
         static_cast<std::uint32_t>(graphicsQueueFamilyIndex),
         static_cast<std::uint32_t>(presentQueueFamilyIndex)};
 
@@ -468,20 +478,20 @@ auto main() -> int try {
         swapChainCreateInfo.pQueueFamilyIndices = queueFamilyIndices.data();
     }
 
-    vk::SwapchainKHR swapChain = device.createSwapchainKHR(swapChainCreateInfo);
+    const vk::SwapchainKHR swapChain = device.createSwapchainKHR(swapChainCreateInfo);
 
-    std::vector<vk::Image> swapChainImages = device.getSwapchainImagesKHR(swapChain);
+    const std::vector<vk::Image> swapChainImages = device.getSwapchainImagesKHR(swapChain);
 
     std::vector<vk::ImageView> imageViews;
     imageViews.reserve(swapChainImages.size());
 
-    auto componentMapping = vk::ComponentMapping{
+    auto const componentMapping = vk::ComponentMapping{
         .r = vk::ComponentSwizzle::eR,
         .g = vk::ComponentSwizzle::eG,
         .b = vk::ComponentSwizzle::eB,
         .a = vk::ComponentSwizzle::eA};
 
-    auto subResourceRangeColor = vk::ImageSubresourceRange{
+    auto const subResourceRangeColor = vk::ImageSubresourceRange{
         .aspectMask = vk::ImageAspectFlagBits::eColor,
         .baseMipLevel = 0,
         .levelCount = 1,
@@ -489,7 +499,7 @@ auto main() -> int try {
         .layerCount = 1};
 
     for (auto image : swapChainImages) {
-        auto imageViewCreateInfo = vk::ImageViewCreateInfo{
+        auto const imageViewCreateInfo = vk::ImageViewCreateInfo{
             .flags = vk::ImageViewCreateFlags(),
             .image = image,
             .viewType = vk::ImageViewType::e2D,
@@ -501,7 +511,7 @@ auto main() -> int try {
     }
 
     const vk::Format depthFormat = vk::Format::eD16Unorm;
-    vk::FormatProperties formatProperties = physicalDevice.getFormatProperties(depthFormat);
+    const vk::FormatProperties formatProperties = physicalDevice.getFormatProperties(depthFormat);
 
     vk::ImageTiling tiling;
     if (formatProperties.linearTilingFeatures & vk::FormatFeatureFlagBits::eDepthStencilAttachment) {
@@ -537,30 +547,30 @@ auto main() -> int try {
         imageCreateInfo.pQueueFamilyIndices = queueFamilyIndices.data();
     }
 
-    vk::Image depthImage = device.createImage(imageCreateInfo);
+    const vk::Image depthImage = device.createImage(imageCreateInfo);
 
-    vk::MemoryRequirements depthImageMemoryRequirements = device.getImageMemoryRequirements(depthImage);
+    const vk::MemoryRequirements depthImageMemoryRequirements = device.getImageMemoryRequirements(depthImage);
 
-    std::uint32_t depthMemoryTypeIndex = findMemoryType(
+    const std::uint32_t depthMemoryTypeIndex = findMemoryType(
         physicalDevice.getMemoryProperties(),
         depthImageMemoryRequirements.memoryTypeBits,
         vk::MemoryPropertyFlagBits::eDeviceLocal);
 
-    vk::DeviceMemory depthMemory = device.allocateMemory(
+    const vk::DeviceMemory depthMemory = device.allocateMemory(
         vk::MemoryAllocateInfo{
             .allocationSize = depthImageMemoryRequirements.size,
             .memoryTypeIndex = depthMemoryTypeIndex});
 
     device.bindImageMemory(depthImage, depthMemory, 0);
 
-    auto subResourceRangeDepth = vk::ImageSubresourceRange{
+    auto const subResourceRangeDepth = vk::ImageSubresourceRange{
         .aspectMask = vk::ImageAspectFlagBits::eDepth,
         .baseMipLevel = 0,
         .levelCount = 1,
         .baseArrayLayer = 0,
         .layerCount = 1};
 
-    vk::ImageView depthImageView = device.createImageView(
+    const vk::ImageView depthImageView = device.createImageView(
         vk::ImageViewCreateInfo{
             .flags = vk::ImageViewCreateFlags(),
             .image = depthImage,
@@ -570,17 +580,17 @@ auto main() -> int try {
             .subresourceRange = subResourceRangeDepth});
 
     // TODO: replace this later with what "Dear ImGUI" outputs.
-    glm::mat4x4 model = glm::mat4x4(1.0F);
-    glm::mat4x4 view =
+    const glm::mat4x4 model = glm::mat4x4(1.0F);
+    const glm::mat4x4 view =
         glm::lookAt(glm::vec3(-5.0F, 3.0F, -10.0F), glm::vec3(0.0F, 0.0F, 0.0F), glm::vec3(0.0F, -1.0F, 0.0F));
-    glm::mat4x4 projection = glm::perspective(glm::radians(45.0F), 1.0F, 0.1F, 100.0F);
+    const glm::mat4x4 projection = glm::perspective(glm::radians(45.0F), 1.0F, 0.1F, 100.0F);
     // clang-format off
-    glm::mat4x4 clip = glm::mat4x4( 1.0F,  0.0F, 0.0F, 0.0F,
+    const glm::mat4x4 clip = glm::mat4x4( 1.0F,  0.0F, 0.0F, 0.0F,
                                     0.0F, -1.0F, 0.0F, 0.0F,
                                     0.0F,  0.0F, 0.5F, 0.0F,
                                     0.0F,  0.0F, 0.5F, 1.0F );  // vulkan clip space has inverted y and half z !
     // clang-format on
-    glm::mat4x4 mvpc = clip * projection * view * model;
+    const glm::mat4x4 mvpc = clip * projection * view * model;
 
     auto uniformBufferCreateInfo = vk::BufferCreateInfo{
         .flags = vk::BufferCreateFlags(),
@@ -598,42 +608,42 @@ auto main() -> int try {
         uniformBufferCreateInfo.pQueueFamilyIndices = queueFamilyIndices.data();
     }
 
-    vk::Buffer uniformBuffer = device.createBuffer(uniformBufferCreateInfo);
+    const vk::Buffer uniformBuffer = device.createBuffer(uniformBufferCreateInfo);
 
-    vk::MemoryRequirements uniformDataMemoryRequirements = device.getBufferMemoryRequirements(uniformBuffer);
+    const vk::MemoryRequirements uniformDataMemoryRequirements = device.getBufferMemoryRequirements(uniformBuffer);
 
-    std::uint32_t uniformMemoryTypeIndex = findMemoryType(
+    const std::uint32_t uniformMemoryTypeIndex = findMemoryType(
         physicalDevice.getMemoryProperties(),
         uniformDataMemoryRequirements.memoryTypeBits,
         vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
 
-    vk::DeviceMemory uniformDataMemory = device.allocateMemory(
+    const vk::DeviceMemory uniformDataMemory = device.allocateMemory(
         vk::MemoryAllocateInfo{
             .allocationSize = uniformDataMemoryRequirements.size,
             .memoryTypeIndex = uniformMemoryTypeIndex});
 
-    std::uint8_t *pUniformData = static_cast<std::uint8_t *>(device.mapMemory(uniformDataMemory, 0, uniformDataMemoryRequirements.size));
+    auto const pUniformData = static_cast<std::uint8_t *>(device.mapMemory(uniformDataMemory, 0, uniformDataMemoryRequirements.size));
     std::memcpy(pUniformData, &mvpc, sizeof(mvpc));
     device.unmapMemory(uniformDataMemory);
 
     device.bindBufferMemory(uniformBuffer, uniformDataMemory, 0);
 
     // create a DescriptorSetLayout
-    auto descriptorSetLayoutBinding = vk::DescriptorSetLayoutBinding{
+    auto const descriptorSetLayoutBinding = vk::DescriptorSetLayoutBinding{
         .binding = 0,
         .descriptorType = vk::DescriptorType::eUniformBuffer,
         .descriptorCount = 1,
         .stageFlags = vk::ShaderStageFlagBits::eVertex,
         .pImmutableSamplers = nullptr};
 
-    vk::DescriptorSetLayout descriptorSetLayout = device.createDescriptorSetLayout(
+    const vk::DescriptorSetLayout descriptorSetLayout = device.createDescriptorSetLayout(
         vk::DescriptorSetLayoutCreateInfo{
             .flags = vk::DescriptorSetLayoutCreateFlags(),
             .bindingCount = 1,
             .pBindings = &descriptorSetLayoutBinding});
 
     // create a PipelineLayout using that DescriptorSetLayout
-    vk::PipelineLayout pipelineLayout = device.createPipelineLayout(
+    const vk::PipelineLayout pipelineLayout = device.createPipelineLayout(
         vk::PipelineLayoutCreateInfo{
             .flags = vk::PipelineLayoutCreateFlags(),
             .setLayoutCount = 1,
@@ -642,11 +652,11 @@ auto main() -> int try {
             .pPushConstantRanges = nullptr});
 
     // create a descriptor pool
-    vk::DescriptorPoolSize poolSize{
+    const vk::DescriptorPoolSize poolSize{
         .type = vk::DescriptorType::eUniformBuffer,
         .descriptorCount = static_cast<std::uint32_t>(swapChainImages.size())};
 
-    vk::DescriptorPool descriptorPool = device.createDescriptorPool(
+    const vk::DescriptorPool descriptorPool = device.createDescriptorPool(
         vk::DescriptorPoolCreateInfo{
             .flags = vk::DescriptorPoolCreateFlags(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet),
             .maxSets = static_cast<std::uint32_t>(swapChainImages.size()),
@@ -654,19 +664,19 @@ auto main() -> int try {
             .pPoolSizes = &poolSize});
 
     // allocate a descriptor set
-    vk::DescriptorSetAllocateInfo descriptorSetAllocateInfo{
+    const vk::DescriptorSetAllocateInfo descriptorSetAllocateInfo{
         .descriptorPool = descriptorPool,
         .descriptorSetCount = 1,
         .pSetLayouts = &descriptorSetLayout};
 
-    vk::DescriptorSet descriptorSet = device.allocateDescriptorSets(descriptorSetAllocateInfo).front();
+    const vk::DescriptorSet descriptorSet = device.allocateDescriptorSets(descriptorSetAllocateInfo).front();
 
-    vk::DescriptorBufferInfo descriptorBufferInfo{
+    const vk::DescriptorBufferInfo descriptorBufferInfo{
         .buffer = uniformBuffer,
         .offset = 0,
         .range = sizeof(glm::mat4x4)};
 
-    vk::WriteDescriptorSet writeDescriptorSet{
+    const vk::WriteDescriptorSet writeDescriptorSet{
         .dstSet = descriptorSet,
         .dstBinding = 0,
         .dstArrayElement = 0,
@@ -678,39 +688,37 @@ auto main() -> int try {
 
     device.updateDescriptorSets(writeDescriptorSet, nullptr);
 
-    std::array<vk::AttachmentDescription, 2> attachmentDescriptions;
+    const std::array<vk::AttachmentDescription, 2> attachmentDescriptions = {
+        vk::AttachmentDescription{
+            .flags = vk::AttachmentDescriptionFlags(),
+            .format = colorFormat,
+            .samples = vk::SampleCountFlagBits::e1,
+            .loadOp = vk::AttachmentLoadOp::eClear,
+            .storeOp = vk::AttachmentStoreOp::eStore,
+            .stencilLoadOp = vk::AttachmentLoadOp::eDontCare,
+            .stencilStoreOp = vk::AttachmentStoreOp::eDontCare,
+            .initialLayout = vk::ImageLayout::eUndefined,
+            .finalLayout = vk::ImageLayout::ePresentSrcKHR},
+        vk::AttachmentDescription{
+            .flags = vk::AttachmentDescriptionFlags(),
+            .format = depthFormat,
+            .samples = vk::SampleCountFlagBits::e1,
+            .loadOp = vk::AttachmentLoadOp::eClear,
+            .storeOp = vk::AttachmentStoreOp::eDontCare,
+            .stencilLoadOp = vk::AttachmentLoadOp::eDontCare,
+            .stencilStoreOp = vk::AttachmentStoreOp::eDontCare,
+            .initialLayout = vk::ImageLayout::eUndefined,
+            .finalLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal}};
 
-    attachmentDescriptions[0] = vk::AttachmentDescription{
-        .flags = vk::AttachmentDescriptionFlags(),
-        .format = colorFormat,
-        .samples = vk::SampleCountFlagBits::e1,
-        .loadOp = vk::AttachmentLoadOp::eClear,
-        .storeOp = vk::AttachmentStoreOp::eStore,
-        .stencilLoadOp = vk::AttachmentLoadOp::eDontCare,
-        .stencilStoreOp = vk::AttachmentStoreOp::eDontCare,
-        .initialLayout = vk::ImageLayout::eUndefined,
-        .finalLayout = vk::ImageLayout::ePresentSrcKHR};
-
-    attachmentDescriptions[1] = vk::AttachmentDescription{
-        .flags = vk::AttachmentDescriptionFlags(),
-        .format = depthFormat,
-        .samples = vk::SampleCountFlagBits::e1,
-        .loadOp = vk::AttachmentLoadOp::eClear,
-        .storeOp = vk::AttachmentStoreOp::eDontCare,
-        .stencilLoadOp = vk::AttachmentLoadOp::eDontCare,
-        .stencilStoreOp = vk::AttachmentStoreOp::eDontCare,
-        .initialLayout = vk::ImageLayout::eUndefined,
-        .finalLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal};
-
-    auto colorReference = vk::AttachmentReference{
+    auto const colorReference = vk::AttachmentReference{
         .attachment = 0,
         .layout = vk::ImageLayout::eColorAttachmentOptimal};
 
-    auto depthReference = vk::AttachmentReference{
+    auto const depthReference = vk::AttachmentReference{
         .attachment = 1,
         .layout = vk::ImageLayout::eDepthStencilAttachmentOptimal};
 
-    auto subpass = vk::SubpassDescription{
+    auto const subpass = vk::SubpassDescription{
         .flags = vk::SubpassDescriptionFlags(),
         .pipelineBindPoint = vk::PipelineBindPoint::eGraphics,
         .inputAttachmentCount = 0,
@@ -722,7 +730,7 @@ auto main() -> int try {
         .preserveAttachmentCount = 0,
         .pPreserveAttachments = nullptr};
 
-    vk::RenderPass renderPass = device.createRenderPass(
+    const vk::RenderPass renderPass = device.createRenderPass(
         vk::RenderPassCreateInfo{
             .flags = vk::RenderPassCreateFlags(),
             .attachmentCount = static_cast<std::uint32_t>(attachmentDescriptions.size()),
@@ -749,13 +757,13 @@ auto main() -> int try {
     // My twitter rant about it can be found here
     // https://twitter.com/HackingPheasant/status/1447811202839547904
     // https://web.archive.org/web/20211012062754/https://twitter.com/HackingPheasant/status/1447811202839547904
-    vk::ShaderModule vertexShaderModule = device.createShaderModule(
+    const vk::ShaderModule vertexShaderModule = device.createShaderModule(
         vk::ShaderModuleCreateInfo{
             .flags = vk::ShaderModuleCreateFlags(),
             .codeSize = vertShader.size() * sizeof(std::uint32_t),
             .pCode = vertShader.data()});
 
-    vk::ShaderModule fragmentShaderModule = device.createShaderModule(
+    const vk::ShaderModule fragmentShaderModule = device.createShaderModule(
         vk::ShaderModuleCreateInfo{
             .flags = vk::ShaderModuleCreateFlags(),
             .codeSize = fragShader.size() * sizeof(std::uint32_t),
@@ -798,30 +806,30 @@ auto main() -> int try {
         vertexBufferCreateInfo.pQueueFamilyIndices = queueFamilyIndices.data();
     }
 
-    vk::Buffer vertexBuffer = device.createBuffer(vertexBufferCreateInfo);
+    const vk::Buffer vertexBuffer = device.createBuffer(vertexBufferCreateInfo);
 
     // allocate device memory for that buffer
-    vk::MemoryRequirements vertexDataMemoryRequirements = device.getBufferMemoryRequirements(vertexBuffer);
+    const vk::MemoryRequirements vertexDataMemoryRequirements = device.getBufferMemoryRequirements(vertexBuffer);
 
-    std::uint32_t vertexMemoryTypeIndex = findMemoryType(
+    const std::uint32_t vertexMemoryTypeIndex = findMemoryType(
         physicalDevice.getMemoryProperties(),
         vertexDataMemoryRequirements.memoryTypeBits,
         vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent);
 
-    vk::DeviceMemory vertexDataMemory = device.allocateMemory(
+    const vk::DeviceMemory vertexDataMemory = device.allocateMemory(
         vk::MemoryAllocateInfo{
             .allocationSize = vertexDataMemoryRequirements.size,
             .memoryTypeIndex = vertexMemoryTypeIndex});
 
     // copy the vertex and color data into that device memory
-    std::uint8_t *pVertexData = static_cast<std::uint8_t *>(device.mapMemory(vertexDataMemory, 0, vertexDataMemoryRequirements.size));
+    auto const pVertexData = static_cast<std::uint8_t *>(device.mapMemory(vertexDataMemory, 0, vertexDataMemoryRequirements.size));
     std::memcpy(pVertexData, &coloredCubeData, sizeof(coloredCubeData));
     device.unmapMemory(vertexDataMemory);
 
     // and bind the device memory to the vertex buffer
     device.bindBufferMemory(vertexBuffer, vertexDataMemory, 0);
 
-    std::array<vk::PipelineShaderStageCreateInfo, 2> pipelineShaderStageCreateInfos = {
+    const std::array<vk::PipelineShaderStageCreateInfo, 2> pipelineShaderStageCreateInfos = {
         vk::PipelineShaderStageCreateInfo{
             .flags = vk::PipelineShaderStageCreateFlags(),
             .stage = vk::ShaderStageFlagBits::eVertex,
@@ -835,12 +843,12 @@ auto main() -> int try {
             .pName = "main",
             .pSpecializationInfo = nullptr}};
 
-    auto vertexInputBindingDescription = vk::VertexInputBindingDescription{
+    auto const vertexInputBindingDescription = vk::VertexInputBindingDescription{
         .binding = 0,
         .stride = sizeof(coloredCubeData[0]),
         .inputRate = vk::VertexInputRate::eVertex};
 
-    std::array<vk::VertexInputAttributeDescription, 2> vertexInputAttributeDescriptions = {
+    constexpr std::array<vk::VertexInputAttributeDescription, 2> vertexInputAttributeDescriptions = {
         vk::VertexInputAttributeDescription{
             .location = 0,
             .binding = 0,
@@ -852,26 +860,26 @@ auto main() -> int try {
             .format = vk::Format::eR32G32B32A32Sfloat,
             .offset = 16}};
 
-    auto pipelineVertexInputStateCreateInfo = vk::PipelineVertexInputStateCreateInfo{
+    auto const pipelineVertexInputStateCreateInfo = vk::PipelineVertexInputStateCreateInfo{
         .flags = vk::PipelineVertexInputStateCreateFlags(),
         .vertexBindingDescriptionCount = 1,
         .pVertexBindingDescriptions = &vertexInputBindingDescription,
         .vertexAttributeDescriptionCount = static_cast<std::uint32_t>(vertexInputAttributeDescriptions.size()),
         .pVertexAttributeDescriptions = vertexInputAttributeDescriptions.data()};
 
-    auto pipelineInputAssemblyStateCreateInfo = vk::PipelineInputAssemblyStateCreateInfo{
+    auto const pipelineInputAssemblyStateCreateInfo = vk::PipelineInputAssemblyStateCreateInfo{
         .flags = vk::PipelineInputAssemblyStateCreateFlags(),
         .topology = vk::PrimitiveTopology::eTriangleList,
         .primitiveRestartEnable = VK_FALSE};
 
-    auto pipelineViewportStateCreateInfo = vk::PipelineViewportStateCreateInfo{
+    auto const pipelineViewportStateCreateInfo = vk::PipelineViewportStateCreateInfo{
         .flags = vk::PipelineViewportStateCreateFlags(),
         .viewportCount = 1,
         .pViewports = nullptr,
         .scissorCount = 1,
         .pScissors = nullptr};
 
-    auto pipelineRasterizationStateCreateInfo = vk::PipelineRasterizationStateCreateInfo{
+    auto const pipelineRasterizationStateCreateInfo = vk::PipelineRasterizationStateCreateInfo{
         .flags = vk::PipelineRasterizationStateCreateFlags(),
         .depthClampEnable = VK_FALSE,
         .rasterizerDiscardEnable = VK_FALSE,
@@ -884,7 +892,7 @@ auto main() -> int try {
         .depthBiasSlopeFactor = 0.0F,
         .lineWidth = 1.0F};
 
-    auto pipelineMultisampleStateCreateInfo = vk::PipelineMultisampleStateCreateInfo{
+    auto const pipelineMultisampleStateCreateInfo = vk::PipelineMultisampleStateCreateInfo{
         .flags = vk::PipelineMultisampleStateCreateFlags(),
         .rasterizationSamples = vk::SampleCountFlagBits::e1,
         .sampleShadingEnable = VK_FALSE,
@@ -893,7 +901,7 @@ auto main() -> int try {
         .alphaToCoverageEnable = VK_FALSE,
         .alphaToOneEnable = VK_FALSE};
 
-    auto stencilOpState = vk::StencilOpState{
+    auto const stencilOpState = vk::StencilOpState{
         .failOp = vk::StencilOp::eKeep,
         .passOp = vk::StencilOp::eKeep,
         .depthFailOp = vk::StencilOp::eKeep,
@@ -902,7 +910,7 @@ auto main() -> int try {
         .writeMask = 0,
         .reference = 0};
 
-    auto pipelineDepthStencilStateCreateInfo = vk::PipelineDepthStencilStateCreateInfo{
+    auto const pipelineDepthStencilStateCreateInfo = vk::PipelineDepthStencilStateCreateInfo{
         .flags = vk::PipelineDepthStencilStateCreateFlags(),
         .depthTestEnable = VK_TRUE,
         .depthWriteEnable = VK_TRUE,
@@ -914,10 +922,10 @@ auto main() -> int try {
         .minDepthBounds = VK_FALSE,
         .maxDepthBounds = VK_FALSE};
 
-    vk::ColorComponentFlags colorComponentFlags(vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG |
-                                                vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA);
+    const vk::ColorComponentFlags colorComponentFlags(vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG |
+                                                      vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA);
 
-    auto pipelineColorBlendAttachmentState = vk::PipelineColorBlendAttachmentState{
+    auto const pipelineColorBlendAttachmentState = vk::PipelineColorBlendAttachmentState{
         .blendEnable = VK_FALSE,
         .srcColorBlendFactor = vk::BlendFactor::eZero,
         .dstColorBlendFactor = vk::BlendFactor::eZero,
@@ -927,7 +935,7 @@ auto main() -> int try {
         .alphaBlendOp = vk::BlendOp::eAdd,
         .colorWriteMask = colorComponentFlags};
 
-    auto pipelineColorBlendStateCreateInfo = vk::PipelineColorBlendStateCreateInfo{
+    auto const pipelineColorBlendStateCreateInfo = vk::PipelineColorBlendStateCreateInfo{
         .flags = vk::PipelineColorBlendStateCreateFlags(),
         .logicOpEnable = VK_FALSE,
         .logicOp = vk::LogicOp::eNoOp,
@@ -935,14 +943,14 @@ auto main() -> int try {
         .pAttachments = &pipelineColorBlendAttachmentState,
         .blendConstants = {{1.0F, 1.0F, 1.0F, 1.0F}}};
 
-    std::array<vk::DynamicState, 2> dynamicStates = {vk::DynamicState::eViewport, vk::DynamicState::eScissor};
+    constexpr std::array<vk::DynamicState, 2> dynamicStates = {vk::DynamicState::eViewport, vk::DynamicState::eScissor};
 
-    auto pipelineDynamicStateCreateInfo = vk::PipelineDynamicStateCreateInfo{
+    auto const pipelineDynamicStateCreateInfo = vk::PipelineDynamicStateCreateInfo{
         .flags = vk::PipelineDynamicStateCreateFlags(),
         .dynamicStateCount = static_cast<std::uint32_t>(dynamicStates.size()),
         .pDynamicStates = dynamicStates.data()};
 
-    auto graphicsPipelineCreateInfo = vk::GraphicsPipelineCreateInfo{
+    auto const graphicsPipelineCreateInfo = vk::GraphicsPipelineCreateInfo{
         .flags = vk::PipelineCreateFlags(),
         .stageCount = static_cast<std::uint32_t>(pipelineShaderStageCreateInfos.size()),
         .pStages = pipelineShaderStageCreateInfos.data(),
@@ -961,7 +969,7 @@ auto main() -> int try {
         .basePipelineHandle = nullptr,
         .basePipelineIndex = 0};
 
-    vk::PipelineCache pipelineCache = device.createPipelineCache(vk::PipelineCacheCreateInfo());
+    const vk::PipelineCache pipelineCache = device.createPipelineCache(vk::PipelineCacheCreateInfo());
 
     vk::Result resultPipeline;
     vk::Pipeline graphicsPipeline;
@@ -985,11 +993,11 @@ auto main() -> int try {
     const std::uint64_t FenceTimeout = 100000000; // 100000000 nanoseconds = 0.1 seconds
 
     // Get the index of the next available swapchain image:
-    vk::Semaphore imageAcquiredSemaphore = device.createSemaphore(
+    const vk::Semaphore imageAcquiredSemaphore = device.createSemaphore(
         vk::SemaphoreCreateInfo{
             .flags = vk::SemaphoreCreateFlags()});
 
-    vk::ResultValue<std::uint32_t> currentBuffer = device.acquireNextImageKHR(
+    const vk::ResultValue<std::uint32_t> currentBuffer = device.acquireNextImageKHR(
         swapChain, FenceTimeout, imageAcquiredSemaphore, nullptr);
     assert(currentBuffer.result == vk::Result::eSuccess); // NOLINT(cppcoreguidelines-pro-bounds-array-to-pointer-decay,hicpp-no-array-decay)
     assert(currentBuffer.value < framebuffers.size());    // NOLINT(cppcoreguidelines-pro-bounds-array-to-pointer-decay,hicpp-no-array-decay)
@@ -998,13 +1006,13 @@ auto main() -> int try {
         .flags = vk::CommandBufferUsageFlags(),
         .pInheritanceInfo = nullptr});
 
-    std::array<vk::ClearValue, 2> clearValues = {
+    const std::array<vk::ClearValue, 2> clearValues = {
         vk::ClearValue{
             .color = vk::ClearColorValue{
                 .float32 = std::array<float, 4>({{0.2F, 0.2F, 0.2F, 0.2F}})}},
         vk::ClearValue{.depthStencil = vk::ClearDepthStencilValue{.depth = 1.0F, .stencil = 0}}};
 
-    auto renderPassBeginInfo = vk::RenderPassBeginInfo{
+    auto const renderPassBeginInfo = vk::RenderPassBeginInfo{
         .renderPass = renderPass,
         .framebuffer = framebuffers[currentBuffer.value],
         .renderArea = vk::Rect2D{
@@ -1037,12 +1045,12 @@ auto main() -> int try {
     commandBuffer.endRenderPass();
     commandBuffer.end();
 
-    vk::Fence drawFence = device.createFence(vk::FenceCreateInfo{
+    const vk::Fence drawFence = device.createFence(vk::FenceCreateInfo{
         .flags = vk::FenceCreateFlags()});
 
-    vk::PipelineStageFlags waitDestinationStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput);
+    const vk::PipelineStageFlags waitDestinationStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput);
 
-    auto submitInfo = vk::SubmitInfo{
+    auto const submitInfo = vk::SubmitInfo{
         .waitSemaphoreCount = 1,
         .pWaitSemaphores = &imageAcquiredSemaphore,
         .pWaitDstStageMask = &waitDestinationStageMask,
@@ -1059,7 +1067,7 @@ auto main() -> int try {
     }
 
     /* Now present the image in the window */
-    vk::Result resultPresentKHR = presentQueue.presentKHR(
+    const vk::Result resultPresentKHR = presentQueue.presentKHR(
         vk::PresentInfoKHR{
             .waitSemaphoreCount = 0,
             .pWaitSemaphores = nullptr,
@@ -1079,6 +1087,8 @@ auto main() -> int try {
         // an unexpected result is returned !
         assert(false); // NOLINT(cppcoreguidelines-pro-bounds-array-to-pointer-decay,hicpp-no-array-decay)
     }
+    // This is purely here so we can actually have a moment to see our glorius rendered cube!
+    // ALL HAIL THE CUBE
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
     device.waitIdle();

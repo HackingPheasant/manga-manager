@@ -26,6 +26,6 @@ class AppWindow {
 
     AppWindow(std::string_view, int, int);
     ~AppWindow();
-    auto createSurface(vk::Instance &) const -> vk::SurfaceKHR;
+    auto createSurface(const vk::Instance &) const -> vk::SurfaceKHR;
     void getWindowSize();
 };

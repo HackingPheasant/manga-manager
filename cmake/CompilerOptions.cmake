@@ -2,6 +2,10 @@
 add_library(project_options INTERFACE)
 add_library(project::options ALIAS project_options)
 
+# Intergrate Window System Intergration (WSI) options with compiler options
+include(WindowSystemIntergration)
+target_link_libraries(project_options INTERFACE platform_wsi_defines)
+
 # Set C++ Standard
 target_compile_features(project_options INTERFACE cxx_std_23)
 

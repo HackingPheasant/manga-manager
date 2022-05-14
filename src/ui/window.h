@@ -2,7 +2,7 @@
 #include <string>
 #include <string_view>
 
-#include "vulkan_defines.h"
+#include <vulkan/vulkan.hpp>
 
 #define SDL_MAIN_HANDLED
 #include <SDL.h>

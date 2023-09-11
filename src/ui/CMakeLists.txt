@@ -31,8 +31,10 @@ add_custom_command(COMMENT "Compiling Vulkan.hpp tutorial example fragment shade
 target_sources("manga-manager_ui"
     PRIVATE
     window.cpp
+    vulkan_renderer.cpp
     PUBLIC
     window.h
+    vulkan_renderer.h
     ${CMAKE_CURRENT_BINARY_DIR}/vulkantut.vert.inc
     ${CMAKE_CURRENT_BINARY_DIR}/vulkantut.frag.inc
     )

@@ -1,6 +1,8 @@
+#ifndef UI_WINDOW_H
+#define UI_WINDOW_H
+
 #include <cstdint>
 #include <string>
-#include <string_view>
 
 #include <vulkan/vulkan.hpp>
 
@@ -24,8 +26,8 @@ class AppWindow {
 
     SDL_Window *window;
 
-    AppWindow(std::string_view, int, int);
+    AppWindow(std::string, int, int);
     ~AppWindow();
-    auto createSurface(const vk::Instance &) const -> vk::SurfaceKHR;
-    void getWindowSize();
+    void getCurrentWindowSize();
 };
+#endif

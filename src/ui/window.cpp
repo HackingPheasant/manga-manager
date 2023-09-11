@@ -1,7 +1,9 @@
+#include <exception>
+
 #include "window.h"
 
-AppWindow::AppWindow(std::string_view windowName, int width, int height) : extent(width, height),
-                                                                           title(windowName) {
+AppWindow::AppWindow(std::string windowName, int width, int height) : extent(width, height),
+                                                                      title(std::move(windowName)) {
     // Initialize SDL2
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_TIMER) != 0) {
         throw std::runtime_error("Unable to initialize SDL: " + std::string(SDL_GetError()));
@@ -28,18 +30,7 @@ AppWindow::~AppWindow() {
     SDL_Quit();
 }
 
-auto AppWindow::createSurface(const vk::Instance &instance) const -> vk::SurfaceKHR {
-    // We need to pass the C version of the object to the 3rd-party library
-    VkSurfaceKHR _surface = nullptr;
-    if (SDL_Vulkan_CreateSurface(window, static_cast<VkInstance>(instance), &_surface) == 0) {
-        throw std::runtime_error("Could not create a Vulkan surface: " + std::string(SDL_GetError()));
-    }
-
-    // We can then return the C++ version of the object :)
-    return {vk::SurfaceKHR(_surface)};
-}
-
-void AppWindow::getWindowSize() {
+void AppWindow::getCurrentWindowSize() {
     // Get the size of the windows underlying drawable dimension
     // May differ to SDL_GetWindowSize() if rendering to a high-DPI
     // drawable. e,g, Apples "Retina" screen

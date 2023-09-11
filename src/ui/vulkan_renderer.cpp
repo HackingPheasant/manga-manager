@@ -30,7 +30,7 @@ VKAPI_ATTR vk::Bool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBi
     void * /*pUserData*/) {
     // NOTE:
     // Function body taken from
-    // https://github.com/KhronosGroup/Vulkan-Hpp/blob/master/RAII_Samples/EnableValidationWithCallback/EnableValidationWithCallback.cpp
+    // https://github.com/KhronosGroup/Vulkan-Hpp/blob/main/RAII_Samples/EnableValidationWithCallback/EnableValidationWithCallback.cpp
     // TODO:
     // - Make my own one instead of copy+paste. But for getting a basic thing
     // up and running, this is good enough for me.
@@ -597,6 +597,7 @@ void VulkanRender::initSwapchain(int windowWidth, int windowHeight) {
                 .layerCount = 1}});
     // clang-format on
 }
+
 void VulkanRender::createUniformBuffer() {
     // My specific data that I want to use in the uniform buffer
     // At the moment I'll have it inside the function till I get the inital
@@ -620,6 +621,7 @@ void VulkanRender::createUniformBuffer() {
 
     std::tie(uniformBufferMemory, uniformDataBuffer) = createBuffer(vk::BufferUsageFlagBits::eUniformBuffer, mvpc);
 }
+
 void VulkanRender::initRenderPass() {
     std::array<vk::AttachmentDescription, 2> attachmentDescriptions = {
         vk::AttachmentDescription{
@@ -673,6 +675,7 @@ void VulkanRender::initRenderPass() {
             .dependencyCount = 0,
             .pDependencies = nullptr});
 }
+
 void VulkanRender::initFramebuffers() {
     std::array<vk::ImageView, 2> attachments;
     attachments[1] = *depthView;
@@ -694,9 +697,11 @@ void VulkanRender::initFramebuffers() {
         framebuffers.emplace_back(device, framebufferCreateInfo);
     }
 }
+
 void VulkanRender::createVertexBuffer() {
     std::tie(vertexBufferMemory, vertexBuffer) = createBuffer(vk::BufferUsageFlagBits::eVertexBuffer, coloredCubeData);
 }
+
 void VulkanRender::initPipeline() {
     auto descriptorSetLayoutBinding = vk::DescriptorSetLayoutBinding{
         .binding = 0,
@@ -728,8 +733,6 @@ void VulkanRender::initPipeline() {
         .type = vk::DescriptorType::eUniformBuffer,
         .descriptorCount = 1};
 
-    // TODO I am creating an invalid descriptor pool(?)
-    // Need to see what the issue is
     descriptorPool = vk::raii::DescriptorPool(device,
         vk::DescriptorPoolCreateInfo{
             // eFreeDescriptorSet flag needed when using Vulkan RAII Library
@@ -948,15 +951,9 @@ void VulkanRender::initPipeline() {
         assert(false); // should never happen
     }
 }
-auto VulkanRender::aquireNextImage() -> std::pair<vk::Result, std::uint32_t> {
-    // vk::raii::Semaphore imageAcquiredSemaphore = nullptr;
 
-    // if (recycledSemaphores.empty()) {
+auto VulkanRender::aquireNextImage() -> std::pair<vk::Result, std::uint32_t> {
     imageAcquiredSemaphore = vk::raii::Semaphore(device, vk::SemaphoreCreateInfo());
-    //} else {
-    //    imageAcquiredSemaphore = recycledSemaphores.back();
-    //    recycledSemaphores.pop_back();
-    //}
 
     vk::Result result;
     std::uint32_t imageIndex;
@@ -964,38 +961,30 @@ auto VulkanRender::aquireNextImage() -> std::pair<vk::Result, std::uint32_t> {
     std::tie(result, imageIndex) = swapChain.acquireNextImage(fenceTimeout, *imageAcquiredSemaphore);
 
     if (result != vk::Result::eSuccess) {
-        // recycledSemaphores.push_back(imageAcquiredSemaphore);
         return {result, imageIndex};
     }
     assert(imageIndex < swapChainImages.size());
 
-    // If we have outstanding fences for this swapchain image,
-    // wait for to complete first. Once frame returns, it is safe
-    // to reuse or delete resources which were previously used
-
-    // if (per_frame_data[imageIndex].queue_submit_fence) {
-    //   device.waitForFences(per_frame_data[imageIndex, true, UINT64_MAX);
-    //   device.resetFences(per_frame_data[iamgeIndex].queue_submit_fence);
-    // }
-    //
-    // if (per_frame_data[imageIndex].primary_command_pool) {
-    //   device.resetCommandPool(per_frame_data[imageIndex].primary_command_pool);
-    // }
-    //
-    //  Recycle the old semaphore
-    //
-    // vk::raii::Semaphore oldSemaphore = per_frame_data[imageIndex].swapchainAcquiredSemaphore;
-    //
-    // if (old_semaphore) {
-    //   recycledSemaphores.push_back(old_semaphore);
-    // }
-    //
-    // per_frame_data[imageIndex].swapchainAcquiredSemaphore = imageAcquiredSemaphore;
-
     return {vk::Result::eSuccess, imageIndex};
 }
+
 void VulkanRender::render() {
     std::tie(result, imageIndex) = aquireNextImage();
+
+    // TODO Properly handle anything other than an Success!
+    switch (result) {
+    case vk::Result::eSuccess:
+        break;
+    case vk::Result::eTimeout:
+        break;
+    case vk::Result::eNotReady:
+        break;
+    case vk::Result::eSuboptimalKHR:
+        break;
+    default:
+        // an unexpected result is returned !
+        assert(false); 
+    }
 
     commandBuffer.begin(vk::CommandBufferBeginInfo{
         .flags = vk::CommandBufferUsageFlags(),
@@ -1061,9 +1050,10 @@ void VulkanRender::render() {
         /* do nothing */
     }
 }
+
 void VulkanRender::present() {
     /* Now present the image in the window */
-    result = presentQueue.presentKHR(
+    auto presentResult = presentQueue.presentKHR(
         vk::PresentInfoKHR{
             .waitSemaphoreCount = 0,
             .pWaitSemaphores = nullptr,
@@ -1072,7 +1062,7 @@ void VulkanRender::present() {
             .pImageIndices = &imageIndex,
             .pResults = nullptr});
 
-    switch (result) {
+    switch (presentResult) {
     case vk::Result::eSuccess:
         break;
     case vk::Result::eSuboptimalKHR:
@@ -1081,7 +1071,7 @@ void VulkanRender::present() {
         break;
     default:
         // an unexpected result is returned !
-        assert(false); // NOLINT(cppcoreguidelines-pro-bounds-array-to-pointer-decay,hicpp-no-array-decay)
+        assert(false); 
     }
     // This is purely here so we can actually have a moment to see our glorius rendered cube!
     // ALL HAIL THE CUBE

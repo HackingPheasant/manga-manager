@@ -2,13 +2,13 @@ if(TARGET Catch2::Catch2)
     return()
 endif()
 
-message(STATUS "Third-party (external) targets available:'Catch2::Catch2'")
+message(STATUS "Third-party targets available:'Catch2::Catch2'")
 
 include(FetchContent)
 FetchContent_Declare(
     Catch2
     GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-    GIT_TAG v2.13.7
+    GIT_TAG v3.4.0
     )
 
 FetchContent_MakeAvailable(Catch2)

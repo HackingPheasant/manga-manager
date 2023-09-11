@@ -1,23 +1,26 @@
-# TODO: Clean this up
 if(TARGET imgui::imgui)
     return()
 endif()
 
-message(STATUS "Third-party (external) targets available: 'imgui::imgui'")
+message(STATUS "Third-party targets available: 'imgui::imgui'")
 
 include(FetchContent)
 FetchContent_Declare(
     imgui
     GIT_REPOSITORY https://github.com/ocornut/imgui.git
-    GIT_TAG v1.85
+    GIT_TAG v1.89.9
     )
 
 FetchContent_MakeAvailable(imgui)
 
-# TODO: Make all below "if's" avaible via the option target
-# But for now this will do.
+set(IMGUI_BUILD_METAL_BINDING OFF)
+set(IMGUI_BUILD_OSX_BINDING OFF)
 set(IMGUI_BUILD_SDL2_BINDING ON)
+set(IMGUI_BUILD_SDL2_RENDERER_BINDING OFF)
 set(IMGUI_BUILD_VULKAN_BINDING ON)
+set(IMGUI_BUILD_WIN32_BINDING OFF)
+set(IMGUI_FREETYPE OFF)
+set(IMGUI_USE_WCHAR32 OFF)
 
 # Taken from:
 # - https://github.com/microsoft/vcpkg/blob/master/ports/imgui/CMakeLists.txt
@@ -43,51 +46,9 @@ target_sources(
         ${imgui_SOURCE_DIR}/misc/cpp/imgui_stdlib.cpp
 )
 
-if(IMGUI_BUILD_ALLEGRO5_BINDING)
-    find_path(ALLEGRO5_INCLUDE_DIRS allegro5/allegro.h)
-    target_include_directories(imgui PRIVATE ${ALLEGRO5_INCLUDE_DIRS})
-    target_sources(imgui PRIVATE ${imgui_SOURCE_DIR}/backends/imgui_impl_allegro5.cpp)
-endif()
-
-if(IMGUI_BUILD_DX9_BINDING)
-    target_sources(imgui PRIVATE ${imgui_SOURCE_DIR}/backends/imgui_impl_dx9.cpp)
-endif()
-
-if(IMGUI_BUILD_DX10_BINDING)
-    target_sources(imgui PRIVATE ${imgui_SOURCE_DIR}/backends/imgui_impl_dx10.cpp)
-endif()
-
-if(IMGUI_BUILD_DX11_BINDING)
-    target_sources(imgui PRIVATE ${imgui_SOURCE_DIR}/backends/imgui_impl_dx11.cpp)
-endif()
-
-if(IMGUI_BUILD_DX12_BINDING)
-    target_sources(imgui PRIVATE ${imgui_SOURCE_DIR}/backends/imgui_impl_dx12.cpp)
-endif()
-
-if(IMGUI_BUILD_GLFW_BINDING)
-    find_package(glfw3 CONFIG REQUIRED)
-    target_link_libraries(imgui PUBLIC glfw)
-    target_sources(imgui PRIVATE ${imgui_SOURCE_DIR}/backends/imgui_impl_glfw.cpp)
-endif()
-
-if(IMGUI_BUILD_GLUT_BINDING)
-    find_package(GLUT REQUIRED)
-    target_link_libraries(imgui PUBLIC GLUT::GLUT)
-    target_sources(imgui PRIVATE ${imgui_SOURCE_DIR}/backends/imgui_impl_glut.cpp)
-endif()
-
 if(IMGUI_BUILD_METAL_BINDING)
     target_sources(imgui PRIVATE ${imgui_SOURCE_DIR}/backends/imgui_impl_metal.mm)
     set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/backends/imgui_impl_metal.mm PROPERTIES COMPILE_FLAGS -fobjc-weak)
-endif()
-
-if(IMGUI_BUILD_OPENGL2_BINDING)
-    target_sources(imgui PRIVATE ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl2.cpp)
-endif()
-
-if(IMGUI_BUILD_OPENGL3_BINDING)
-    target_sources(imgui PRIVATE ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp)
 endif()
 
 if(IMGUI_BUILD_OSX_BINDING)
@@ -95,19 +56,16 @@ if(IMGUI_BUILD_OSX_BINDING)
 endif()
 
 if(IMGUI_BUILD_SDL2_BINDING)
-    #find_package(SDL2 CONFIG REQUIRED)
     target_link_libraries(imgui PUBLIC SDL2::SDL2)
     target_sources(imgui PRIVATE ${imgui_SOURCE_DIR}/backends/imgui_impl_sdl.cpp)
 endif()
 
 if(IMGUI_BUILD_SDL2_RENDERER_BINDING)
-    find_package(SDL2 CONFIG REQUIRED)
     target_link_libraries(imgui PUBLIC SDL2::SDL2)
-    target_sources(imgui PRIVATE ${imgui_SOURCE_DIR}/backends/imgui_impl_sdlrenderer.cpp)
+    target_sources(imgui PRIVATE ${imgui_SOURCE_DIR}/backends/imgui_impl_sdlrenderer2.cpp)
 endif()
 
 if(IMGUI_BUILD_VULKAN_BINDING)
-    #find_package(Vulkan REQUIRED)
     target_link_libraries(imgui PUBLIC Vulkan::Vulkan)
     target_sources(imgui PRIVATE ${imgui_SOURCE_DIR}/backends/imgui_impl_vulkan.cpp)
 endif()
@@ -162,55 +120,8 @@ if(NOT IMGUI_SKIP_HEADERS)
         DESTINATION include
     )
 
-    if(IMGUI_BUILD_ALLEGRO5_BINDING)
-        install(FILES ${imgui_SOURCE_DIR}/backends/imgui_impl_allegro5.h DESTINATION include)
-    endif()
-
-    if(IMGUI_BUILD_DX9_BINDING)
-        install(FILES ${imgui_SOURCE_DIR}/backends/imgui_impl_dx9.h DESTINATION include)
-    endif()
-
-    if(IMGUI_BUILD_DX10_BINDING)
-        install(FILES ${imgui_SOURCE_DIR}/backends/imgui_impl_dx10.h DESTINATION include)
-    endif()
-
-    if(IMGUI_BUILD_DX11_BINDING)
-        install(FILES ${imgui_SOURCE_DIR}/backends/imgui_impl_dx11.h DESTINATION include)
-    endif()
-
-    if(IMGUI_BUILD_DX12_BINDING)
-        install(FILES ${imgui_SOURCE_DIR}/backends/imgui_impl_dx12.h DESTINATION include)
-    endif()
-
-    if(IMGUI_BUILD_GLFW_BINDING)
-        install(FILES ${imgui_SOURCE_DIR}/backends/imgui_impl_glfw.h DESTINATION include)
-    endif()
-
-    if(IMGUI_BUILD_GLUT_BINDING)
-        install(FILES ${imgui_SOURCE_DIR}/backends/imgui_impl_glut.h DESTINATION include)
-    endif()
-
-    if(IMGUI_COPY_MARMALADE_BINDING)
-        file(GLOB MARMALADE_BINDING_SRCS ${imgui_SOURCE_DIR}/backends/imgui_impl_marmalade.*)
-        install(FILES ${MARMALADE_BINDING_SRCS} DESTINATION include/bindings)
-    endif()
-
     if(IMGUI_BUILD_METAL_BINDING)
         install(FILES ${imgui_SOURCE_DIR}/backends/imgui_impl_metal.h DESTINATION include)
-    endif()
-
-    if(IMGUI_BUILD_OPENGL2_BINDING)
-        install(FILES ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl2.h DESTINATION include)
-    endif()
-
-    if(IMGUI_BUILD_OPENGL3_BINDING)
-        install(
-            FILES
-                ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.h
-                ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3_loader.h
-            DESTINATION
-                include
-        )
     endif()
 
     if(IMGUI_BUILD_OSX_BINDING)

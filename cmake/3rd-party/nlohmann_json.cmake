@@ -21,6 +21,7 @@ FetchContent_Declare(
     # GIT_REPOSITORY https://github.com/nlohmann/json.git
     GIT_REPOSITORY https://github.com/ArthurSonzogni/nlohmann_json_cmake_fetchcontent.git
     GIT_TAG v3.11.2
+    FIND_PACKAGE_ARGS
     )
 
 FetchContent_MakeAvailable(nlohmann_json)

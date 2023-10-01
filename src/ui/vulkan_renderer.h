@@ -135,10 +135,9 @@ class VulkanRender {
     // For now we will leave everything to the defaults (off), as we don't
     // we rely on any optional features at the moment, so no need to enable any.
     // https://registry.khronos.org/vulkan/specs/1.3-extensions/html/vkspec.html#features
-    const vk::PhysicalDeviceFeatures physicalDeviceFeatures;
+    vk::PhysicalDeviceFeatures enableDeviceFeatures;
     vk::raii::Device device = nullptr;
     vk::raii::SurfaceKHR surface = nullptr;
-    // std::pair<std::uint32_t, std::uint32_t> graphicsAndPresentQueueFamilyIndex;
     std::array<std::uint32_t, 2> graphicsAndPresentQueueFamilyIndex{};
     vk::raii::CommandPool commandPool = nullptr;
     vk::raii::CommandBuffers commandBuffers = nullptr;
@@ -169,7 +168,6 @@ class VulkanRender {
     vk::raii::PipelineCache graphicsPipelineCache = nullptr;
     vk::raii::Queue graphicsQueue = nullptr;
     vk::raii::Queue presentQueue = nullptr;
-    // std::vector<vk::raii::Semaphore> recycledSemaphores;
     //  TODO This is Temp VVV
     vk::raii::Semaphore imageAcquiredSemaphore = nullptr;
     vk::raii::Fence drawFence = nullptr;

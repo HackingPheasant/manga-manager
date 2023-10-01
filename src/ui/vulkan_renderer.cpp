@@ -255,7 +255,6 @@ VulkanRender::VulkanRender(const std::string &AppName) {
 #endif
 }
 
-// TODO Currently have a memory leak on cleanup
 VulkanRender::~VulkanRender() {
 }
 
@@ -300,6 +299,13 @@ void VulkanRender::selectPhysicalDevice() {
               << VK_VERSION_PATCH(deviceProperties.apiVersion) << "\n";
     // Example of accessing the limits struct
     // std::cout << "Max Compute Shared Memory Size: " << deviceProperties.limits.maxComputeSharedMemorySize / 1024 << " KB" << std::endl;
+
+    // Get Physical Device Features
+    // We can see whats available and then choose to enable them in our
+    // enableDeviceFeatures virable, which is used in device creation
+    // At the moment, I don't need anything specific so this is more
+    // done to silence a vulkan best practice warning
+    [[maybe_unused]] auto features2 = physicalDevice.getFeatures2();
 
     // Notes for vulkan terminology (to better understand the next section of code):
     // - A queuefamily descibes what "type" a queue is
@@ -363,7 +369,7 @@ void VulkanRender::initDevice() {
             .ppEnabledLayerNames = nullptr,
             .enabledExtensionCount = static_cast<std::uint32_t>(deviceExtensions.size()),
             .ppEnabledExtensionNames = deviceExtensions.data(),
-            .pEnabledFeatures = &physicalDeviceFeatures});
+            .pEnabledFeatures = &enableDeviceFeatures});
 
     // Create CommandBuffers and CommandPools
     // CommandPools allocate CommandBuffers, which is where commands for

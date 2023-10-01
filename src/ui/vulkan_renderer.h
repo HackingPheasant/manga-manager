@@ -66,8 +66,6 @@ class VulkanRender {
     void initFramebuffers();
     void createVertexBuffer();
     void initPipeline();
-    // Repeat use functions
-    auto aquireNextImage() -> std::pair<vk::Result, std::uint32_t>;
     void render();
     void present();
     template <typename T>
@@ -171,7 +169,7 @@ class VulkanRender {
     //  TODO This is Temp VVV
     vk::raii::Semaphore imageAcquiredSemaphore = nullptr;
     vk::raii::Fence drawFence = nullptr;
-    vk::Result result;
+    //vk::Result result;
     std::uint32_t imageIndex;
 
     // FenceTimeout specifies how long the function waits, in nanoseconds, if no image is available

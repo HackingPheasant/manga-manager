@@ -958,24 +958,13 @@ void VulkanRender::initPipeline() {
     }
 }
 
-auto VulkanRender::aquireNextImage() -> std::pair<vk::Result, std::uint32_t> {
+void VulkanRender::render() {
+    // Aquire next image
     imageAcquiredSemaphore = vk::raii::Semaphore(device, vk::SemaphoreCreateInfo());
 
     vk::Result result;
-    std::uint32_t imageIndex;
-
     std::tie(result, imageIndex) = swapChain.acquireNextImage(fenceTimeout, *imageAcquiredSemaphore);
-
-    if (result != vk::Result::eSuccess) {
-        return {result, imageIndex};
-    }
     assert(imageIndex < swapChainImages.size());
-
-    return {vk::Result::eSuccess, imageIndex};
-}
-
-void VulkanRender::render() {
-    std::tie(result, imageIndex) = aquireNextImage();
 
     // TODO Properly handle anything other than an Success!
     switch (result) {
@@ -988,7 +977,7 @@ void VulkanRender::render() {
     case vk::Result::eSuboptimalKHR:
         break;
     default:
-        // an unexpected result is returned !
+        // an unexpected result is returned!
         assert(false); 
     }
 

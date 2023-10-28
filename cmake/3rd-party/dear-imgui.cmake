@@ -2,7 +2,7 @@ if(TARGET imgui::imgui)
     return()
 endif()
 
-message(STATUS "Third-party targets available: 'imgui::imgui'")
+message(VERBOSE "Third-party targets available: 'imgui::imgui'")
 
 include(FetchContent)
 FetchContent_Declare(

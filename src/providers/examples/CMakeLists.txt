@@ -10,3 +10,5 @@ target_link_libraries("mangadex-test" PUBLIC
     fmt::fmt
     nlohmann_json::nlohmann_json
     )
+
+install(TARGETS "mangadex-test" DESTINATION bin)

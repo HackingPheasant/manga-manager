@@ -1,8 +1,8 @@
 {
-    "version": 3,
+    "version": 4,
     "cmakeMinimumRequired": {
         "major": 3,
-        "minor": 21,
+        "minor": 24,
         "patch": 0
     },
     "configurePresets": [
@@ -12,6 +12,7 @@
             "description": "Base configuration",
             "hidden": true,
             "binaryDir": "${sourceDir}/build/${presetName}",
+            "installDir": "out/${presetName}",
             "cacheVariables": {
                 "CMAKE_EXPORT_COMPILE_COMMANDS" : "ON"
             }
@@ -136,8 +137,35 @@
             "configurePreset": "minsizerel",
             "jobs": 4
         }
-
     ],
     "testPresets": [
+        {
+            "name": "debug",
+            "configurePreset": "debug"
+        },
+        {
+            "name": "dev",
+            "configurePreset": "dev"
+        },
+        {
+            "name": "release",
+            "configurePreset": "release"
+        },
+        {
+            "name": "release-static-libs",
+            "configurePreset": "release-static-libs"
+        },
+        {
+            "name": "release-shared-libs",
+            "configurePreset": "release-shared-libs"
+        },
+        {
+            "name": "relwithdebinfo",
+            "configurePreset": "relwithdebinfo"
+        },
+        {
+            "name": "minsizerel",
+            "configurePreset": "minsizerel"
+        }
     ]
 }

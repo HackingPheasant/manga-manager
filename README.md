@@ -12,7 +12,7 @@ Manga manger and downloader built with C++
     ```
 3. Install
     ```bash
-    cmake --install --preset <name> # CMake 3.15+ only
+    cmake --build --preset <name> --target install
     ```
 
 4. Test (Optional)
@@ -41,7 +41,6 @@ Listed in no particular order
 
 - [cpp_starter_project](https://github.com/lefticus/cpp_starter_project) and [adobe/lagrange](https://github.com/adobe/lagrange) for the knowledge and inspiring the CMake related stuff.
 - [nlohmann/json](https://github.com/nlohmann/json/) C++ JSON library
-- [whoshuu/cpr](https://github.com/whoshuu/cpr) C++ Requests wrapper around [curl](https://github.com/curl/curl) to simplify usage in code
 - [fmtlib/fmt](https://github.com/fmtlib/fmt) A modern formatting library
 - [CMake](https://cmake.org/)
 - [bibo5088/mangadex-downloader](https://github.com/bibo5088/mangadex-downloader/) Mangadex downloader, inspired the beginning of this project

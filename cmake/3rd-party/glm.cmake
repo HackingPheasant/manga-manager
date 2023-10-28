@@ -2,7 +2,7 @@ if(TARGET glm::glm)
     return()
 endif()
 
-message(STATUS "Third-party targets available: 'glm::glm'")
+message(VERBOSE "Third-party targets available: 'glm::glm'")
 
 include(FetchContent)
 FetchContent_Declare(

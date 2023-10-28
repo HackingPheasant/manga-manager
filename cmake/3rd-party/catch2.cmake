@@ -2,7 +2,7 @@ if(TARGET Catch2::Catch2)
     return()
 endif()
 
-message(STATUS "Third-party targets available:'Catch2::Catch2'")
+message(VERBOSE "Third-party targets available:'Catch2::Catch2'")
 
 include(FetchContent)
 FetchContent_Declare(

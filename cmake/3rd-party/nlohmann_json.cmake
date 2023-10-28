@@ -2,7 +2,7 @@ if(TARGET nlohmann_json::nlohmann_json)
     return()
 endif()
 
-message(STATUS "Third-party targets available: 'nlohmann_json::nlohmann_json'")
+message(VERBOSE "Third-party targets available: 'nlohmann_json::nlohmann_json'")
 
 if (NOT DEFINED JSON_SystemInclude)
     set(JSON_SystemInclude ON)

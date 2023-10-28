@@ -1,6 +1,6 @@
 # Project specific settings
 cmake_minimum_required(VERSION 3.24)
-# Minimum 3.21 because of CMakePresets.json changes and FindVulkan.cmake changes
+# Absolute minimum was 3.21 because of CMakePresets.json changes and FindVulkan.cmake changes
 
 project(manga-manager
     VERSION 0.1.0
@@ -31,21 +31,5 @@ enable_sanitizers(project_options)
 # Allow for static analysis options
 include(StaticAnalyzers)
 
-# Put the libaries and binaries that get built into directories at the
-# top of the build tree rather than in hard-to-find leaf directories.
-#
-# But only if this variables are not defined yet
-# (i.e. libevent is used via add_subdirectory())
-if (NOT DEFINED CMAKE_RUNTIME_OUTPUT_DIRECTORY)
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
-endif()
-if (NOT DEFINED CMAKE_LIBRARY_OUTPUT_DIRECTORY)
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
-endif()
-if (NOT DEFINED CMAKE_ARCHIVE_OUTPUT_DIRECTORY)
-    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
-endif()
-
+# Our code to build
 add_subdirectory(src)
-
-# TODO: Write install commands

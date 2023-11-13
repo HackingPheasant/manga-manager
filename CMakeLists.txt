@@ -1,6 +1,9 @@
 # Project specific settings
-cmake_minimum_required(VERSION 3.24)
-# Absolute minimum was 3.21 because of CMakePresets.json changes and FindVulkan.cmake changes
+cmake_minimum_required(VERSION 3.25...3.28)
+# Reasons we bumbed the minimum cmake version:
+# - 3.21: Absolute minimum because of CMakePresets.json changes and FindVulkan.cmake changes
+# - 3.24 Because of improvements to FetchContent
+# - 3.25 Because of improvements to CMakePresets.json
 
 project(manga-manager
     VERSION 0.1.0

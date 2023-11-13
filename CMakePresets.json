@@ -1,8 +1,8 @@
 {
-    "version": 4,
+    "version": 6,
     "cmakeMinimumRequired": {
         "major": 3,
-        "minor": 24,
+        "minor": 25,
         "patch": 0
     },
     "configurePresets": [
@@ -19,22 +19,11 @@
         },
         {
             "inherits": "base",
-            "name": "debug",
-            "displayName": "Debug",
-            "description": "Build as Debug",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
-            }
-        },
-        {
-            "inherits": [
-                "base",
-                "debug"
-            ],
             "name": "dev",
             "displayName": "Developer",
             "description": "Build as Debug, with warnings enabled.",
             "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
                 "ENABLE_WARNINGS": "TRUE"
             },
             "warnings": {
@@ -58,114 +47,135 @@
             }
         },
         {
-            "inherits": [
-                "base",
-                "release"
-            ],
-            "name": "release-static-libs",
-            "displayName": "Release (Static libs)",
-            "description": "Build as Release, forcing static built libraries",
-            "cacheVariables": {
-                "BUILD_SHARED_LIBS": "OFF"
-            }
-        },
-        {
-            "inherits": [
-                "base",
-                "release"
-            ],
-            "name": "release-shared-libs",
-            "displayName": "Release (Shared libs)",
-            "description": "Build as Release, forcing shared built libraries",
-            "cacheVariables": {
-                "BUILD_SHARED_LIBS": "ON"
-            }
-        },
-        {
             "inherits": "base",
             "name": "relwithdebinfo",
             "displayName": "RelWithDebInfo",
             "description": "Build as Release with Debug Info",
-            "binaryDir": "${sourceDir}/build/${presetName}",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "RelWithDebInfo"
-            }
-        },
-        {
-            "inherits": "base",
-            "name": "minsizerel",
-            "displayName": "MinSizeRel",
-            "description": "Build as Release, optimizing for size",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "MinSizeRel"
             }
         }
     ],
     "buildPresets": [
         {
-            "name": "debug",
-            "configurePreset": "debug",
-            "jobs": 4
-        },
-        {
             "name": "dev",
+            "displayName": "Developer",
+            "description": "Build as Debug, with warnings enabled.",
             "configurePreset": "dev",
             "jobs": 4
         },
         {
             "name": "release",
+            "displayName": "Release",
+            "description": "Build as Release",
             "configurePreset": "release",
             "jobs": 4
         },
         {
-            "name": "release-static-libs",
-            "configurePreset": "release-static-libs",
-            "jobs": 4
-        },
-        {
-            "name": "release-shared-libs",
-            "configurePreset": "release-shared-libs",
-            "jobs": 4
-        },
-        {
             "name": "relwithdebinfo",
+            "displayName": "RelWithDebInfo",
+            "description": "Build as Release with Debug Info",
             "configurePreset": "relwithdebinfo",
-            "jobs": 4
-        },
-        {
-            "name": "minsizerel",
-            "configurePreset": "minsizerel",
             "jobs": 4
         }
     ],
     "testPresets": [
         {
-            "name": "debug",
-            "configurePreset": "debug"
-        },
+            "name": "dev",
+            "displayName": "Developer",
+            "description": "Test the debug build",
+            "configurePreset": "dev",
+            "output": {
+                "shortProgress": true,
+                "outputOnFailure": true
+            },
+            "execution": {
+                "jobs": 4,
+                "scheduleRandom": true
+            }
+        }
+    ],
+    "packagePresets": [
         {
             "name": "dev",
+            "displayName": "Developer",
+            "description": "A packaged Debug build.",
             "configurePreset": "dev"
         },
         {
             "name": "release",
+            "displayName": "Release",
+            "description": "A packaged Release build",
             "configurePreset": "release"
         },
         {
-            "name": "release-static-libs",
-            "configurePreset": "release-static-libs"
+            "name": "relwithdebinfo",
+            "displayName": "RelWithDebInfo",
+            "description": "A packaged Release build including Debug Info",
+            "configurePreset": "relwithdebinfo"
+        }
+    ],
+    "workflowPresets": [
+        {
+            "name": "dev",
+            "displayName": "Developer",
+            "description": "The full developer workflow, including debug symbols and tests setup!",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "dev"
+                },
+                {
+                    "type": "build",
+                    "name": "dev"
+                },
+                {
+                    "type": "test",
+                    "name": "dev"
+                },
+                {
+                    "type": "package",
+                    "name": "dev"
+                }
+            ]
         },
         {
-            "name": "release-shared-libs",
-            "configurePreset": "release-shared-libs"
+            "name": "release",
+            "displayName": "Release",
+            "description": "Basic Release (Configure, Build, Package)",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "release"
+                },
+                {
+                    "type": "build",
+                    "name": "release"
+                },
+                {
+                    "type": "package",
+                    "name": "release"
+                }
+            ]
         },
         {
             "name": "relwithdebinfo",
-            "configurePreset": "relwithdebinfo"
-        },
-        {
-            "name": "minsizerel",
-            "configurePreset": "minsizerel"
+            "displayName": "RelWithDebInfo",
+            "description": "Basic Release including Debug Info (Configure, Build, Package)",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "relwithdebinfo"
+                },
+                {
+                    "type": "build",
+                    "name": "relwithdebinfo"
+                },
+                {
+                    "type": "package",
+                    "name": "relwithdebinfo"
+                }
+            ]
         }
     ]
 }

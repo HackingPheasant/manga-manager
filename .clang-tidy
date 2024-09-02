@@ -1,25 +1,142 @@
 ---
 Checks:             "*,
-                    -cppcoreguidelines-avoid-magic-numbers,
-                    -fuchsia-default-arguments-calls,
-                    -fuchsia-trailing-return,
-                    -google-readability-braces-around-statements,
-                    -google-readability-namespace-comments,
-                    -google-readability-todo,
-                    -google-runtime-int,
-                    -hicpp-avoid-c-arrays,
-                    -hicpp-braces-around-statements,
-                    -hicpp-deprecated-headers,
-                    -hicpp-no-malloc,
-                    -hicpp-signed-bitwise,
-                    -hicpp-uppercase-literal-suffix,
-                    -hicpp-use-auto,
-                    -hicpp-use-emplace,
-                    -hicpp-vararg,
-                    -llvmlibc-callee-namespace,
-                    -llvmlibc-implementation-in-namespace,
-                    -llvmlibc-restrict-system-libc-headers,
-                    -readability-function-cognitive-complexity,
-                    -readability-magic-numbers"
+-altera-id-dependent-backward-branch,
+-altera-unroll-loops,
+-bugprone-easily-swappable-parameters,
+-cppcoreguidelines-avoid-magic-numbers,
+-cppcoreguidelines-owning-memory,
+-fuchsia-default-arguments-calls,
+-fuchsia-trailing-return,
+-google-readability-braces-around-statements,
+-google-readability-namespace-comments,
+-google-readability-todo,
+-google-runtime-int,
+-hicpp-avoid-c-arrays,
+-hicpp-braces-around-statements,
+-hicpp-deprecated-headers,
+-hicpp-no-malloc,
+-hicpp-signed-bitwise,
+-hicpp-uppercase-literal-suffix,
+-hicpp-use-auto,
+-hicpp-use-emplace,
+-hicpp-vararg,
+-llvmlibc-callee-namespace,
+-llvmlibc-implementation-in-namespace,
+-llvmlibc-restrict-system-libc-headers,
+-misc-include-cleaner,
+-misc-use-anonymous-namespace,
+-readability-function-cognitive-complexity,
+-readability-identifier-length,
+-readability-magic-numbers"
+# misc-include-cleaner is to noisy at the moment, will have to look into using it correctly
 HeaderFilterRegex:  ''
 FormatStyle:        file
+CheckOptions:
+  - key:             readability-identifier-naming.ConceptCase
+    value:           camelBack
+  - key:             readability-identifier-naming.AbstractClassCase
+    value:           camelBack
+  - key:             readability-identifier-naming.ClassCase
+    value:           camelBack
+  - key:             readability-identifier-naming.ClassConstantCase
+    value:           lower_case
+  - key:             readability-identifier-naming.ClassMemberCase
+    value:           lower_case
+  - key:             readability-identifier-naming.ClassMemberPrefix
+    value:           m_
+  - key:             readability-identifier-naming.ClassMethodCase
+    value:           lower_case
+  - key:             readability-identifier-naming.ConstantCase
+    value:           lower_case
+  - key:             readability-identifier-naming.ConstantMemberCase
+    value:           lower_case
+  - key:             readability-identifier-naming.ConstantParameterCase
+    value:           lower_case
+  - key:             readability-identifier-naming.ConstantPointerParameterCase
+    value:           lower_case
+  - key:             readability-identifier-naming.ConstexprFunctionCase
+    value:           lower_case
+  - key:             readability-identifier-naming.ConstexprMethodCase
+    value:           lower_case
+  - key:             readability-identifier-naming.ConstexprVariableCase
+    value:           lower_case
+  - key:             readability-identifier-naming.EnumCase
+    value:           aNy_CasE
+  - key:             readability-identifier-naming.EnumConstantCase
+    value:           aNy_CasE
+  - key:             readability-identifier-naming.FunctionCase
+    value:           lower_case
+  - key:             readability-identifier-naming.GetConfigPerFile
+    value:           true
+  - key:             readability-identifier-naming.GlobalConstantCase
+    value:           lower_case
+  - key:             readability-identifier-naming.GlobalConstantPointerCase
+    value:           lower_case
+  - key:             readability-identifier-naming.GlobalFunctionCase
+    value:           lower_case
+  - key:             readability-identifier-naming.GlobalPointerCase
+    value:           lower_case
+  - key:             readability-identifier-naming.GlobalVariableCase
+    value:           lower_case
+  - key:             readability-identifier-naming.InlineNamespaceCase
+    value:           aNy_CasE
+  - key:             readability-identifier-naming.LocalConstantCase
+    value:           lower_case
+  - key:             readability-identifier-naming.LocalConstantPointerCase
+    value:           lower_case
+  - key:             readability-identifier-naming.LocalPointerCase
+    value:           lower_case
+  - key:             readability-identifier-naming.LocalVariableCase
+    value:           lower_case
+  - key:             readability-identifier-naming.MacroDefinitionCase
+    value:           UPPER_CASE
+  - key:             readability-identifier-naming.MemberCase
+    value:           lower_case
+  - key:             readability-identifier-naming.MethodCase
+    value:           lower_case
+  - key:             readability-identifier-naming.NamespaceCase
+    value:           aNy_CasE
+  - key:             readability-identifier-naming.ParameterCase
+    value:           lower_case
+  - key:             readability-identifier-naming.ParameterPackCase
+    value:           lower_case
+  - key:             readability-identifier-naming.PointerParameterCase
+    value:           lower_case
+  - key:             readability-identifier-naming.PrivateMemberCase
+    value:           lower_case
+  - key:             readability-identifier-naming.PrivateMethodCase
+    value:           lower_case
+  - key:             readability-identifier-naming.ProtectedMemberCase
+    value:           lower_case
+  - key:             readability-identifier-naming.ProtectedMethodCase
+    value:           lower_case
+  - key:             readability-identifier-naming.PublicMemberCase
+    value:           lower_case
+  - key:             readability-identifier-naming.PublicMethodCase
+    value:           lower_case
+  - key:             readability-identifier-naming.ScopedEnumConstantCase
+    value:           aNy_CasE
+  - key:             readability-identifier-naming.StaticConstantCase
+    value:           lower_case
+  - key:             readability-identifier-naming.StaticVariableCase
+    value:           lower_case
+  - key:             readability-identifier-naming.StructCase
+    value:           camelBack
+  - key:             readability-identifier-naming.TemplateParameterCase
+    value:           aNy_CasE
+  - key:             readability-identifier-naming.TemplateTemplateParameterCase
+    value:           aNy_CasE
+  - key:             readability-identifier-naming.TypeAliasCase
+    value:           aNy_CasE
+  - key:             readability-identifier-naming.TypedefCase
+    value:           aNy_CasE
+  - key:             readability-identifier-naming.TypeTemplateParameterCase
+    value:           aNy_CasE
+  - key:             readability-identifier-naming.UnionCase
+    value:           aNy_CasE
+  - key:             readability-identifier-naming.ValueTemplateParameterCase
+    value:           lower_case
+  - key:             readability-identifier-naming.VariableCase
+    value:           lower_case
+  - key:             readability-identifier-naming.VirtualMethodCase
+    value:           lower_case

@@ -2,21 +2,24 @@ if(TARGET imgui::imgui)
     return()
 endif()
 
+include(FeatureSummary)
+
 message(VERBOSE "Third-party targets available: 'imgui::imgui'")
 
 include(FetchContent)
 FetchContent_Declare(
     imgui
     GIT_REPOSITORY https://github.com/ocornut/imgui.git
-    GIT_TAG v1.89.9
-    )
+    GIT_TAG v1.91.0
+    GIT_SHALLOW ON
+    GIT_PROGRESS ON
+)
 
 FetchContent_MakeAvailable(imgui)
 
+set(IMGUI_BUILD_ANDROID_BINDING OFF)
 set(IMGUI_BUILD_METAL_BINDING OFF)
 set(IMGUI_BUILD_OSX_BINDING OFF)
-set(IMGUI_BUILD_SDL2_BINDING ON)
-set(IMGUI_BUILD_SDL2_RENDERER_BINDING OFF)
 set(IMGUI_BUILD_VULKAN_BINDING ON)
 set(IMGUI_BUILD_WIN32_BINDING OFF)
 set(IMGUI_FREETYPE OFF)
@@ -31,38 +34,32 @@ target_include_directories(
     imgui
     SYSTEM
     PUBLIC
-        $<BUILD_INTERFACE:${imgui_SOURCE_DIR}>
-        $<INSTALL_INTERFACE:include>
+    $<BUILD_INTERFACE:${imgui_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:include>
 )
 
 target_sources(
     imgui
     PRIVATE
-        ${imgui_SOURCE_DIR}/imgui.cpp
-        ${imgui_SOURCE_DIR}/imgui_demo.cpp
-        ${imgui_SOURCE_DIR}/imgui_draw.cpp
-        ${imgui_SOURCE_DIR}/imgui_tables.cpp
-        ${imgui_SOURCE_DIR}/imgui_widgets.cpp
-        ${imgui_SOURCE_DIR}/misc/cpp/imgui_stdlib.cpp
+    ${imgui_SOURCE_DIR}/imgui.cpp
+    ${imgui_SOURCE_DIR}/imgui_demo.cpp
+    ${imgui_SOURCE_DIR}/imgui_draw.cpp
+    ${imgui_SOURCE_DIR}/imgui_tables.cpp
+    ${imgui_SOURCE_DIR}/imgui_widgets.cpp
+    ${imgui_SOURCE_DIR}/misc/cpp/imgui_stdlib.cpp
 )
+
+if(IMGUI_BUILD_ANDROID_BINDING)
+    target_sources(imgui PRIVATE ${imgui_SOURCE_DIR}/backends/imgui_impl_android.cpp)
+endif()
 
 if(IMGUI_BUILD_METAL_BINDING)
     target_sources(imgui PRIVATE ${imgui_SOURCE_DIR}/backends/imgui_impl_metal.mm)
-    set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/backends/imgui_impl_metal.mm PROPERTIES COMPILE_FLAGS -fobjc-weak)
+    set_source_files_properties(${imgui_SOURCE_DIR}/backends/imgui_impl_metal.mm PROPERTIES COMPILE_FLAGS -fobjc-weak)
 endif()
 
 if(IMGUI_BUILD_OSX_BINDING)
     target_sources(imgui PRIVATE ${imgui_SOURCE_DIR}/backends/imgui_impl_osx.mm)
-endif()
-
-if(IMGUI_BUILD_SDL2_BINDING)
-    target_link_libraries(imgui PUBLIC SDL2::SDL2)
-    target_sources(imgui PRIVATE ${imgui_SOURCE_DIR}/backends/imgui_impl_sdl.cpp)
-endif()
-
-if(IMGUI_BUILD_SDL2_RENDERER_BINDING)
-    target_link_libraries(imgui PUBLIC SDL2::SDL2)
-    target_sources(imgui PRIVATE ${imgui_SOURCE_DIR}/backends/imgui_impl_sdlrenderer2.cpp)
 endif()
 
 if(IMGUI_BUILD_VULKAN_BINDING)
@@ -120,20 +117,16 @@ if(NOT IMGUI_SKIP_HEADERS)
         DESTINATION include
     )
 
+    if (IMGUI_BUILD_ANDROID_BINDING)
+        install(FILES ${imgui_SOURCE_DIR}/backends/imgui_impl_android.h DESTINATION include)
+    endif()
+
     if(IMGUI_BUILD_METAL_BINDING)
         install(FILES ${imgui_SOURCE_DIR}/backends/imgui_impl_metal.h DESTINATION include)
     endif()
 
     if(IMGUI_BUILD_OSX_BINDING)
         install(FILES ${imgui_SOURCE_DIR}/backends/imgui_impl_osx.h DESTINATION include)
-    endif()
-
-    if(IMGUI_BUILD_SDL2_BINDING)
-        install(FILES ${imgui_SOURCE_DIR}/backends/imgui_impl_sdl.h DESTINATION include)
-    endif()
-
-     if(IMGUI_BUILD_SDL2_RENDERER_BINDING)
-        install(FILES ${imgui_SOURCE_DIR}/backends/imgui_impl_sdlrenderer.h DESTINATION include)
     endif()
 
     if(IMGUI_BUILD_VULKAN_BINDING)
@@ -158,5 +151,10 @@ install(
     EXPORT imgui_target
     NAMESPACE imgui::
     FILE imgui-targets.cmake
-    DESTINATION 3rd-party/imgui
+    DESTINATION share/imgui
 )
+
+set_package_properties(imgui PROPERTIES
+    URL "https://github.com/ocornut/imgui"
+    DESCRIPTION "Bloat-free GUI for C++"
+    TYPE RECOMMENDED)

@@ -6,8 +6,23 @@ add_library(project::options ALIAS project_options)
 include(WindowSystemIntergration)
 target_link_libraries(project_options INTERFACE platform_wsi_defines)
 
-# Set C++ Standard
+# Intergrate Vulkan Defines with compiler options
+target_compile_definitions(project_options INTERFACE
+    # Enable C++ Designated Initializers in Vulkan.{hpp/cppm}
+    VULKAN_HPP_NO_CONSTRUCTORS
+    # Disable setter member functions
+    VULKAN_HPP_NO_SETTERS
+    # We currently do no make use of UniqueHandle
+    VULKAN_HPP_NO_SMART_HANDLE
+    # Use Dynamic Dispatcher
+    # TODO: It's currently disabled, debug our issue so we can use it
+    VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=0
+)
+
+
+# Set C++ Standard and avoid compiler specific extensions.
 target_compile_features(project_options INTERFACE cxx_std_23)
+#set_target_properties(project_options PROPERTIES CXX_EXTENSIONS OFF)
 
 # installation
 set_target_properties(project_options PROPERTIES EXPORT_NAME compiler_options)
@@ -25,7 +40,7 @@ if("${CMAKE_CXX_COMPILER_ID}" MATCHES ".*Clang")
             "-Wextra"               # reasonable and standard
             "-Wshadow"              # warn the user if a variable declaration shadows one from a parent context
             "-Wnon-virtual-dtor"    # warn the user if a class with virtual functions has a non-virtual destructor.
-                                    # This helps catch hard to track down memory errors
+            # This helps catch hard to track down memory errors
             "-Wold-style-cast"      # warn for c-style casts
             "-Wcast-align"          # warn for potential performance problem casts
             "-Wunused"              # warn on anything being unused
@@ -37,7 +52,7 @@ if("${CMAKE_CXX_COMPILER_ID}" MATCHES ".*Clang")
             "-Wdouble-promotion"    # warn if float is implicit promoted to double
             "-Wformat=2"            # warn on security issues around functions that format output (ie printf)
             "-Wimplicit-fallthrough"# warn on statements that fallthrough without an explicit annotation
-            )
+        )
 
         if(ENABLE_WARNINGS_AS_ERRORS)
             target_compile_options(project_options INTERFACE "-Werror")
@@ -63,7 +78,7 @@ elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
             "-Wshadow"              # warn the user if a variable declaration shadows one from a parent context
             "-Wpedantic"
             "-Wnon-virtual-dtor"    # warn the user if a class with virtual functions has a non-virtual destructor.
-                                    # This helps catch hard to track down memory errors
+            # This helps catch hard to track down memory errors
             "-Wold-style-cast"      # warn for c-style casts
             "-Wcast-align"          # warn for potential performance problem casts
             "-Wunused"              # warn on anything being unused
@@ -79,7 +94,7 @@ elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
             "-Wduplicated-branches" # warn if if / else branches have duplicated code
             "-Wlogical-op"          # warn about logical operations being used where bitwise were probably wanted
             "-Wuseless-cast"        # warn if you perform a cast to the same type
-            )
+        )
 
         if(ENABLE_WARNINGS_AS_ERRORS)
             target_compile_options(project_options INTERFACE "-Werror")
@@ -88,7 +103,7 @@ elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     target_compile_options(project_options INTERFACE
         "/permissive-" # standards conformance mode for MSVC compiler.
-        )
+    )
     if(ENABLE_WARNINGS)
         target_compile_options(project_options INTERFACE
             "/W4"       # Baseline reasonable warnings
@@ -96,10 +111,10 @@ elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
             "/w14254"   # 'operator': conversion from 'type1:field_bits' to 'type2:field_bits', possible loss of data
             "/w14263"   # 'function': member function does not override any base class virtual member function
             "/w14265"   # 'classname': class has virtual functions, but destructor is not virtual instances of this
-                        # class may not be destructed correctly
+            # class may not be destructed correctly
             "/w14287"   # 'operator': unsigned/negative constant mismatch
             "/we4289"   # nonstandard extension used: 'variable': loop control variable declared in the for-loop is
-                        # used outside the for-loop scope
+            # used outside the for-loop scope
             "/w14296"   # 'operator': expression is always 'boolean_value'
             "/w14311"   # 'variable': pointer truncation from 'type1' to 'type2'
             "/w14545"   # expression before comma evaluates to a function which is missing an argument list
@@ -113,7 +128,7 @@ elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
             "/w14905"   # wide string literal cast to 'LPSTR'
             "/w14906"   # string literal cast to 'LPWSTR'
             "/w14928"   # illegal copy-initialization; more than one user-defined conversion has been implicitly applied
-            )
+        )
 
         if(ENABLE_WARNINGS_AS_ERRORS)
             target_compile_options(project_options INTERFACE "/WX")
@@ -128,5 +143,5 @@ endif()
 if(WIN32)
     target_compile_definitions(project_options INTERFACE
         "NOMINMAX"  # Stop windows.h min/max macros conflicting with C++ Standard Library
-        )
+    )
 endif()

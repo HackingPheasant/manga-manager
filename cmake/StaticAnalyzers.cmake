@@ -5,9 +5,17 @@ option(ENABLE_INCLUDE_WHAT_YOU_USE "Enable static analysis with include-what-you
 if(ENABLE_CPPCHECK)
   find_program(CPPCHECK cppcheck)
   if(CPPCHECK)
+    # Create cppcheck output/cache dir for faster runs
+    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/cppcheck_output)
     set(CMAKE_CXX_CPPCHECK
         ${CPPCHECK}
-        --suppress=missingInclude
+        # Waiting on https://gitlab.kitware.com/cmake/cmake/-/issues/25641
+        # Once using project cppcheck should have way less false flags
+        # e.g. unused functions because it'll scan more than just individual files
+        #--project=${CMAKE_BINARY_DIR}/compile_commands.json
+        --cppcheck-build-dir=${CMAKE_BINARY_DIR}/cppcheck_output
+        --checkers-report=${CMAKE_BINARY_DIR}/cppcheck_output/checkers-report
+        --suppress=missingIncludeSystem
         --enable=all
         --inline-suppr
         --inconclusive
@@ -22,7 +30,8 @@ endif()
 if(ENABLE_CLANG_TIDY)
   find_program(CLANGTIDY clang-tidy)
   if(CLANGTIDY)
-    set(CMAKE_CXX_CLANG_TIDY ${CLANGTIDY} -extra-arg=-Wno-unknown-warning-option)
+      set(CMAKE_CXX_CLANG_TIDY ${CLANGTIDY} -p ${CMAKE_BINARY_DIR}/ -extra-arg=-Wno-unknown-warning-option)
+      set(CMAKE_CXX_CLANG_TIDY_EXPORT_FIXES_DIR ${CMAKE_BINARY_DIR}/clang-tidy-fixes)
   else()
     message(SEND_ERROR "clang-tidy requested but executable not found")
   endif()

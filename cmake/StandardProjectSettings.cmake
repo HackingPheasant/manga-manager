@@ -2,31 +2,11 @@
 include(CMakeDependentOption)
 
 # Some project specific options
-
 option(ENABLE_WARNINGS "Enable compiler warnings" OFF)
 cmake_dependent_option(ENABLE_WARNINGS_AS_ERRORS "Treat compiler warnings as errors" OFF "ENABLE_WARNINGS" ON)
 # Off by default, feel free to switch to on by default if you current builds have zero errors
-
-# We should at least ENABLE_TESTING by default when we have some tests
-option(ENABLE_TESTING "Enable Test Builds" OFF) 
-# Enable testing at top level project
-if(ENABLE_TESTING)
-    include(CTest)
-    enable_testing()
-
-    include(catch2)
-    Fetch_GetProperties(catch2)
-    set(CMAKE_MODULE_PATH "${catch2_SOURCE_DIR}/extras" ${CMAKE_MODULE_PATH})
-endif()
-
 option(ENABLE_FUZZING "Enable Fuzzing Builds" OFF)
-if(ENABLE_FUZZING)
-endif()
-
 option(BUILD_DOCUMENTATION "Build documentation" OFF)
-if(BUILD_DOCUMENTATION)
-endif()
-
 option(BUILD_EXAMPLES  "Build all examples" OFF)
 
 # Set a default build type if none was specified
@@ -65,10 +45,5 @@ if(ENABLE_IPO)
     endif()
 endif()
 
-if(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
-  add_compile_options(-fcolor-diagnostics)
-elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  add_compile_options(-fdiagnostics-color=always)
-else()
-  message(STATUS "No colored compiler diagnostic set for '${CMAKE_CXX_COMPILER_ID}' compiler.")
-endif()
+# Enable Color Diagnostics on supported generators and compilers
+set(CMAKE_COLOR_DIAGNOSTICS ON)

@@ -1,8 +1,8 @@
 {
-    "version": 6,
+    "version": 7,
     "cmakeMinimumRequired": {
         "major": 3,
-        "minor": 25,
+        "minor": 27,
         "patch": 0
     },
     "configurePresets": [
@@ -12,7 +12,6 @@
             "description": "Base configuration",
             "hidden": true,
             "binaryDir": "${sourceDir}/build/${presetName}",
-            "installDir": "out/${presetName}",
             "cacheVariables": {
                 "CMAKE_EXPORT_COMPILE_COMMANDS" : "ON"
             }
@@ -22,9 +21,13 @@
             "name": "dev",
             "displayName": "Developer",
             "description": "Build as Debug, with warnings enabled.",
+            "installDir": "out/",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
-                "ENABLE_WARNINGS": "TRUE"
+                "ENABLE_WARNINGS": "ON",
+                "BUILD_DOCUMENTATION": "ON",
+                "BUILD_EXAMPLES": "ON",
+                "BUILD_TESTING": "ON"
             },
             "warnings": {
                 "dev": false,

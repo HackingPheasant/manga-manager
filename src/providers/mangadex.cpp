@@ -1,9 +1,7 @@
-#include <fstream>
-#include <iostream>
+//#include <fstream>
+//#include <iostream>
 
-#include <fmt/core.h>
-
-#include "http.h"
-#include "mangadex.h"
+//#include "http.hpp"
+//#include "mangadex.hpp"
 
 //Unimplemented

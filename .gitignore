@@ -5,3 +5,4 @@ out/*
 Testing/*
 CMakeUserPresets.json
 *session.vim
+.direnv/

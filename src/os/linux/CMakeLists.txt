@@ -1,24 +1,20 @@
-add_library("os_linux")
-add_library("os::linux" ALIAS "os_linux")
+# SPDX-FileCopyrightText: © 2023 HackingPheasant <HackingPheasant@protonmail.com>
+# SPDX-License-Identifier: MIT
+add_library(manga-manager.os.linux)
+add_library(manga-manager::os::linux ALIAS manga-manager.os.linux)
 
-target_link_libraries("os_linux" PUBLIC
-    project::options
+target_link_libraries(manga-manager.os.linux PUBLIC
+  project::options
 )
 
-if(BUILD_LINUX_X11_SUPPORT)
-    add_subdirectory(x11)
-    target_link_libraries("os_linux" PUBLIC
-        linux::x11
-    )
+if(X11_SUPPORT)
+  target_link_libraries(manga-manager.os.linux PUBLIC manga-manager::display-protocol::x11)
 endif()
 
-if(BUILD_LINUX_WAYLAND_SUPPORT)
-    add_subdirectory(wayland)
-    target_link_libraries("os_linux" PUBLIC
-        linux::wayland
-    )
+if(WAYLAND_SUPPORT)
+  target_link_libraries(manga-manager.os.linux PUBLIC manga-manager::display-protocol::wayland)
 endif()
 
-if(NOT BUILD_LINUX_X11_SUPPORT AND NOT BUILD_LINUX_WAYLAND_SUPPORT)
-    message(FATAL_ERROR "Unsupported Platform! Please enable atleast X11 or Wayland in the build system")
+if(NOT X11_SUPPORT AND NOT WAYLAND_SUPPORT)
+    message(FATAL_ERROR "Linux: Unsupported Platform! Please enable atleast X11 or Wayland support in the build system")
 endif()

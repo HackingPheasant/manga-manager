@@ -1,21 +1,20 @@
-add_library("manga-manager_core")
-add_library("manga-manager::core" ALIAS "manga-manager_core")
+# SPDX-FileCopyrightText: © 2020 HackingPheasant <HackingPheasant@protonmail.com>
+# SPDX-License-Identifier: MIT
 
-message(VERBOSE "manga-manager: creating target 'manga-manager::core'")
+add_library(manga-manager.core)
+add_library(manga-manager::core ALIAS manga-manager.core)
 
-include(nlohmann_json)
-
-target_sources("manga-manager_core"
-    PRIVATE
+target_sources(manga-manager.core
+  PRIVATE
     http.cpp
-    PUBLIC
-    FILE_SET public_headers
-    TYPE HEADERS
+
+  PUBLIC
+    FILE_SET HEADERS
     FILES
-    http.hpp
+      http.hpp
 )
 
-target_link_libraries("manga-manager_core" PUBLIC
+target_link_libraries(manga-manager.core PUBLIC
     project::options
-    nlohmann_json::nlohmann_json
+    #nlohmann_json::nlohmann_json
 )

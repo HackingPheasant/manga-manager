@@ -1,8 +1,8 @@
 {
-    "version": 7,
+    "version": 10,
     "cmakeMinimumRequired": {
         "major": 3,
-        "minor": 27,
+        "minor": 31,
         "patch": 0
     },
     "configurePresets": [
@@ -13,18 +13,18 @@
             "hidden": true,
             "binaryDir": "${sourceDir}/build/${presetName}",
             "cacheVariables": {
-                "CMAKE_EXPORT_COMPILE_COMMANDS" : "ON"
+                "CMAKE_EXPORT_COMPILE_COMMANDS" : "ON",
+                "CMAKE_COLOR_DIAGNOSTICS": "ON"
             }
         },
         {
             "inherits": "base",
             "name": "dev",
             "displayName": "Developer",
-            "description": "Build as Debug, with warnings enabled.",
-            "installDir": "out/",
+            "description": "Build as Debug, with warnings enabled. Inteneded for use by developers.",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
-                "ENABLE_WARNINGS": "ON",
+                "ENABLE_COMPILE_WARNINGS": "ON",
                 "BUILD_DOCUMENTATION": "ON",
                 "BUILD_EXAMPLES": "ON",
                 "BUILD_TESTING": "ON"
@@ -33,11 +33,25 @@
                 "dev": false,
                 "deprecated": true,
                 "uninitialized": true,
+                "unusedCli": true,
                 "systemVars": true
             },
             "errors": {
                 "dev": false,
                 "deprecated": true
+            },
+            "trace": {
+                "mode": "off",
+                "format": "human"
+            }
+        },
+        {
+            "inherits": "base",
+            "name": "debug",
+            "displayName": "Debug",
+            "description": "Build as Debug",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
             }
         },
         {
@@ -63,8 +77,15 @@
         {
             "name": "dev",
             "displayName": "Developer",
-            "description": "Build as Debug, with warnings enabled.",
+            "description": "Build as Debug, with warnings enabled. Inteneded for use by developers.",
             "configurePreset": "dev",
+            "jobs": 4
+        },
+        {
+            "name": "debug",
+            "displayName": "debug",
+            "description": "Build as Debug",
+            "configurePreset": "debug",
             "jobs": 4
         },
         {
@@ -84,9 +105,23 @@
     ],
     "testPresets": [
         {
-            "name": "dev",
-            "displayName": "Developer",
-            "description": "Test the debug build",
+            "name": "unit-testing",
+            "displayName": "Unit Testing",
+            "description": "Automated unit testing of libraries and applications.",
+            "configurePreset": "dev",
+            "output": {
+                "shortProgress": true,
+                "outputOnFailure": true
+            },
+            "execution": {
+                "jobs": 4,
+                "scheduleRandom": true
+            }
+        },
+        {
+            "name": "fuzzing",
+            "displayName": "Fuzzing",
+            "description": "Automated fuzzing of libraries and applications.",
             "configurePreset": "dev",
             "output": {
                 "shortProgress": true,
@@ -101,9 +136,15 @@
     "packagePresets": [
         {
             "name": "dev",
-            "displayName": "Developer",
-            "description": "A packaged Debug build.",
+            "displayName": "dev",
+            "description": "A packaged Developer (Debug) build, built with usage of potential development only related flags and dependencies",
             "configurePreset": "dev"
+        },
+        {
+            "name": "debug",
+            "displayName": "Debug",
+            "description": "A packaged Debug build",
+            "configurePreset": "debug"
         },
         {
             "name": "release",
@@ -122,7 +163,7 @@
         {
             "name": "dev",
             "displayName": "Developer",
-            "description": "The full developer workflow, including debug symbols and tests setup!",
+            "description": "Basic developer workflow, with compiler warnings (Configure, Build, Test, Package).",
             "steps": [
                 {
                     "type": "configure",
@@ -134,11 +175,49 @@
                 },
                 {
                     "type": "test",
-                    "name": "dev"
+                    "name": "unit-testing"
                 },
                 {
                     "type": "package",
                     "name": "dev"
+                }
+            ]
+        },
+        {
+            "name": "fuzzing",
+            "displayName": "Fuzzing",
+            "description": "Automated Fuzzing of the projects libraries and applications.",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "dev"
+                },
+                {
+                    "type": "build",
+                    "name": "dev"
+                },
+                {
+                    "type": "test",
+                    "name": "fuzzing"
+                }
+            ]
+        },
+        {
+            "name": "debug",
+            "displayName": "Debug",
+            "description": "Basic Debug Release (Configure, Build, Package)",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "debug"
+                },
+                {
+                    "type": "build",
+                    "name": "debug"
+                },
+                {
+                    "type": "package",
+                    "name": "debug"
                 }
             ]
         },

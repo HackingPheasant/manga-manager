@@ -2,13 +2,29 @@
 Manga manger and downloader built with C++
 
 # For Developers
+A quick CMake usage guide
+
 ## Build
 1. Configure
+The basic project configure step
     ```bash
+    # cmake -B binary_dir -S source_dir
+    cmake -B build/ -S .
+
+    # or via cmake Presets
     cmake --preset <name>
     ```
 To list the available presets that can be used, run `--list-presets=all`.
-Some available options include `dev`, `release`, `relwithdebinfo` etc.
+
+If you wanted to toggle extra options when configuring, see:
+- Project docs or `cmake --help`
+- -D options common for key/value options
+
+E.g. Enable testing and setting install-prefix when configuring
+    ```bash
+    cmake -B build/ -S . -D B
+TODO IN PROGRESS
+    ```
 
 To use a compiler different to the system default:
 In the configure step, append the following (as an example):

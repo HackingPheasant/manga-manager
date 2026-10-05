@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: © 2023 HackingPheasant <HackingPheasant@protonmail.com>
+// SPDX-License-Identifier: MIT
+
 #version 400
 
 #extension GL_ARB_separate_shader_objects : enable

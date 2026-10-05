@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: © 2024 HackingPheasant <HackingPheasant@protonmail.com>
+# SPDX-License-Identifier: MIT
+
 include(InstallRequiredSystemLibraries)
 
 # We will only set info that doesn't already defualt to info supplied elsewhere.
